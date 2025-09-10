@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.edu.atitus.greeting_service.configs.GreetingConfig;
-import dto.GreetingDTO;
+import br.edu.atitus.greeting_service.dto.GreetingDTO;
 
 @RestController
 @RequestMapping("greeting")
