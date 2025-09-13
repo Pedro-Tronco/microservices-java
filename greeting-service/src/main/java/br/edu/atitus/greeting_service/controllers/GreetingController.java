@@ -37,7 +37,7 @@ public class GreetingController {
 		return ResponseEntity.ok(textReturn);
 	}
 
-	@PostMapping()
+	@PostMapping
 	public ResponseEntity<String> greetPost(@RequestBody GreetingDTO dto) throws Exception {
 		String greetingReturn = config.getGreeting();
 		String textReturn = String.format("%s, %s!!!", greetingReturn, dto.name());
