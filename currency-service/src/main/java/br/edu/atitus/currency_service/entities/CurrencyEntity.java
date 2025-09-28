@@ -28,6 +28,9 @@ public class CurrencyEntity {
 	@Transient
 	private double convertedVaule;
 	
+	@Transient
+	private String enviroment;
+	
 	public double getConvertedVaule() {
 		return convertedVaule;
 	}
@@ -43,9 +46,6 @@ public class CurrencyEntity {
 	public void setEnviroment(String enviroment) {
 		this.enviroment = enviroment;
 	}
-
-	@Transient
-	private String enviroment;
 	
 	public Long getId() {
 		return id;
