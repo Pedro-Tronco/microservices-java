@@ -34,7 +34,7 @@ public class CurrencyController {
 			.orElseThrow(() -> new Exception("Currency not found"));
 	
 	currency.setConvertedVaule(value * currency.getConversionRate());
-	currency.setEnviroment("Currency running in port: + serverPort");
+	currency.setEnviroment("Currency running in port:" + serverPort);
 	
 	
 	return ResponseEntity.ok(currency);
