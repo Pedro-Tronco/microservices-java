@@ -1,5 +1,9 @@
 package br.edu.atitus.currency_service.controllers;
 
+import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
@@ -59,8 +63,20 @@ public class CurrencyController {
 			currency.setConversionRate(1);
 		} else {
 			try {
-				String date = "10-10-2025";
-				
+				Calendar cal = Calendar.getInstance();
+			    cal.setTime(new Date());
+
+			    int dayOfWeek;
+			    do {
+			        cal.add(Calendar.DAY_OF_MONTH, -1);
+			        dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+			    } while (dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY);
+
+			    int day = cal.get(Calendar.DAY_OF_MONTH);
+			    int month = cal.get(Calendar.MONTH);
+			    int year = cal.get(Calendar.YEAR);
+			    
+			    String date = month + "-" + day + "-" + year;
 				double sourceRate = 1;
 				double targetRate = 1;
 				
