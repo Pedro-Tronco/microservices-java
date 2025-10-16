@@ -1,8 +1,12 @@
 package br.edu.atitus.currency_service.controllers;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
@@ -14,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.edu.atitus.currency_service.clients.CurrencyBCClient;
 import br.edu.atitus.currency_service.clients.CurrencyBCResponse;
+import br.edu.atitus.currency_service.clients.NationalHolidayClient;
+import br.edu.atitus.currency_service.clients.NationalHolidayResponse;
 import br.edu.atitus.currency_service.entities.CurrencyEntity;
 import br.edu.atitus.currency_service.repositories.CurrencyRepository;
 
@@ -25,16 +31,23 @@ public class CurrencyController {
 	
 	private final CurrencyBCClient currencyBCClient;
 	
+	private final NationalHolidayClient holidayClient;
+	
 	private final CacheManager cacheManager;
 	
 	@Value("${server.port}")
 	private int serverPort;
 
-	public CurrencyController(CurrencyRepository repository, CurrencyBCClient currencyBCClient, CacheManager cacheManager) {
+	public CurrencyController(
+			CurrencyRepository repository, 
+			CurrencyBCClient currencyBCClient, 
+			CacheManager cacheManager,
+			NationalHolidayClient holidayClient) {
 		super();
 		this.repository = repository;
 		this.currencyBCClient = currencyBCClient;
 		this.cacheManager = cacheManager;
+		this.holidayClient = holidayClient;
 	}
 	
 	@GetMapping("/{value}/{source}/{target}")
@@ -65,12 +78,12 @@ public class CurrencyController {
 			try {
 				Calendar cal = Calendar.getInstance();
 			    cal.setTime(new Date());
-
+			    
 			    int dayOfWeek;
 			    do {
 			        cal.add(Calendar.DAY_OF_MONTH, -1);
 			        dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
-			    } while (dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY);
+			    } while (dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY || isHoliday(cal));
 
 			    int day = cal.get(Calendar.DAY_OF_MONTH);
 			    int month = cal.get(Calendar.MONTH);
@@ -115,5 +128,25 @@ public class CurrencyController {
 	return ResponseEntity.ok(currency);
 	
 	}
+	
+	private boolean isHoliday(Calendar cal) throws Exception {
+		LocalDate targetDate = cal.toInstant()
+				  .atZone(ZoneId.systemDefault())
+                  .toLocalDate();
+		
+		List<NationalHolidayResponse> holidays = holidayClient.getNationalHolidays(cal.get(Calendar.YEAR));
+	    
+		for (NationalHolidayResponse holiday : holidays) {
+	    	String dateString = holiday.getDate();
+
+	        LocalDate holidayDate = LocalDate.parse(dateString);
+	    	
+	    	if (targetDate.equals(holidayDate)) {
+	    		return true;
+	    	}
+	    }
+	    
+	    return false;
+	};
 	
 }
