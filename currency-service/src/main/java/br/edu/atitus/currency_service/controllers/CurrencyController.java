@@ -1,7 +1,5 @@
 package br.edu.atitus.currency_service.controllers;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
@@ -120,7 +118,7 @@ public class CurrencyController {
 		
 	cacheManager.getCache(nameCache).put(keyCache, currency);
 	
-	currency.setConvertedVaule(value * currency.getConversionRate());
+	currency.setConvertedValue(value * currency.getConversionRate());
 	currency.setEnviroment("Currency running in port:" + serverPort 
 							+ " | Source: " + dataSource);
 	

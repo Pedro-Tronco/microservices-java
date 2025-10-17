@@ -1,6 +1,7 @@
 package br.edu.atitus.product_service.controllers;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,12 +18,16 @@ import br.edu.atitus.product_service.repositories.ProductRepository;
 public class OpenProductController {
 
 	private final ProductRepository repository;
+	
 	private final CurrencyClient currencyClient;
+	
+	private final CacheManager cacheManager;
 
-	public OpenProductController(ProductRepository repository, CurrencyClient currencyClient) {
+	public OpenProductController(ProductRepository repository, CurrencyClient currencyClient, CacheManager cacheManager) {
 		super();
 		this.repository = repository;
 		this.currencyClient = currencyClient;
+		this.cacheManager = cacheManager;
 	}
 	
 	@Value("${server.port}")
@@ -33,20 +38,40 @@ public class OpenProductController {
 			@PathVariable Long idProduct,
 			@PathVariable String targetCurrency
 			) throws Exception {
-		ProductEntity product = repository.findById(idProduct)
-				.orElseThrow(() -> new Exception("Product not found"));
 		
-		product.setEnviroment("Product Service running on port: " + serverPort);
-		if (targetCurrency.equalsIgnoreCase(product.getCurrency()))
-				product.setConvertedPrice(product.getPrice());
-		else {
-			CurrencyResponse currency = currencyClient.getCurrency(
-					product.getPrice(),
-					product.getCurrency(),
-					targetCurrency);
-			product.setConvertedPrice(currency.getConvertedValue());
-			product.setEnviroment(product.getEnviroment() + " - " + currency.getEnviroment());
+		targetCurrency.toUpperCase();
+		
+		String dataSource = "None";
+		String keyCache = idProduct + targetCurrency;
+		String nameCache = "ProductCache";
+		
+		ProductEntity product = cacheManager.getCache(nameCache).get(keyCache, ProductEntity.class);
+		
+		if(product != null) {
+			dataSource = "Cache";
+		} else {
+			product = new ProductEntity();
+			product = repository.findById(idProduct)
+						.orElseThrow(() -> new Exception("Product not found"));
+		
+			if (targetCurrency.equalsIgnoreCase(product.getCurrency())) {
+					product.setConvertedPrice(product.getPrice());
+					dataSource = "None (target value equals registered value)";
+			} else {
+				CurrencyResponse currency = currencyClient.getCurrency(
+						product.getPrice(),
+						product.getCurrency(),
+						targetCurrency);
+				
+				product.setConvertedPrice(currency.getConvertedValue());
+				dataSource = "Currency Service (" + currency.getEnviroment() + ")";
+				
+			}
 		}
+		
+		cacheManager.getCache(nameCache).put(keyCache, product);
+		
+		product.setEnviroment("Product Service running on port: " + serverPort + " | Source: " + dataSource);
 		
 		return ResponseEntity.ok(product);
 	}

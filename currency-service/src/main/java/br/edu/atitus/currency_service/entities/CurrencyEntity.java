@@ -26,17 +26,17 @@ public class CurrencyEntity {
 	private double conversionRate;
 
 	@Transient
-	private double convertedVaule;
+	private double convertedValue;
 	
 	@Transient
 	private String enviroment;
 	
-	public double getConvertedVaule() {
-		return convertedVaule;
+	public double getConvertedValue() {
+		return convertedValue;
 	}
 
-	public void setConvertedVaule(double convertedVaule) {
-		this.convertedVaule = convertedVaule;
+	public void setConvertedValue(double convertedValue) {
+		this.convertedValue = convertedValue;
 	}
 
 	public String getEnviroment() {
