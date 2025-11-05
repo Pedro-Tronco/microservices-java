@@ -34,7 +34,12 @@ public class ProductEntity {
 	
 	@Transient
 	private double convertedPrice;
+	
+	@Column(name="image_url")
+	private String imageUrl;
 
+	
+	
 	public Long getId() {
 		return id;
 	}
@@ -105,6 +110,14 @@ public class ProductEntity {
 
 	public void setConvertedPrice(double convertedPrice) {
 		this.convertedPrice = convertedPrice;
+	}
+
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
 	}
 	
 }
