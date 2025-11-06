@@ -20,4 +20,4 @@ buildNumber.properties
 .metadata
 
 #Vscode workspace
-.vscode
+.vscode/
