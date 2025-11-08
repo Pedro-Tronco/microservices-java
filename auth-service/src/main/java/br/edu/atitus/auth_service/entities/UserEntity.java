@@ -81,7 +81,6 @@ public class UserEntity implements UserDetails{
 	@Override
 	@JsonIgnore
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

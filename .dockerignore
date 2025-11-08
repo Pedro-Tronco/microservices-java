@@ -4,4 +4,3 @@
 # Exceto pom.xml, a pasta src/ e Dockerfile
 !pom.xml
 !src/
-!Dockerfile

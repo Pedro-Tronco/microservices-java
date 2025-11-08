@@ -19,7 +19,6 @@ services:
     image: config-service:latest
     build:
       context: ./config-service
-      dockerfile: Dockerfile
     depends_on:
       - discovery-service
     environment:
@@ -30,7 +29,6 @@ services:
     image: greeting-service:latest
     build:
       context: ./greeting-service
-      dockerfile: Dockerfile
     depends_on:
       - discovery-service
       - config-service
@@ -52,7 +50,6 @@ services:
     image: currency-service:latest
     build:
       context: ./currency-service
-      dockerfile: Dockerfile
     depends_on:
       - discovery-service
       - db-currency
@@ -76,7 +73,6 @@ services:
     image: product-service:latest
     build:
       context: ./product-service
-      dockerfile: Dockerfile
     depends_on:
       - discovery-service
       - db-product
@@ -123,7 +119,6 @@ services:
     image: order-service:latest
     build:
       context: ./order-service
-      dockerfile: Dockerfile
     depends_on:
       - discovery-service
       - db-order
@@ -146,4 +141,50 @@ services:
     environment:
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka
     
+# -------------------------------
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - auth-service
+      - currency-service
+      - gateway-service
+      - order-service
+      - product-service
+# -------------------------------
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+# -------------------------------
+  promtail:
+    image: grafana/promtail:2.9.2
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./monitoring/promtail-config.yml:/etc/promtail/config.yml
+    depends_on:
+      - loki
+# -------------------------------
+  loki:
+    image: grafana/loki:2.9.2
+    ports:
+      - "3100:3100"
+# -------------------------------
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - loki
+      - zipkin
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
 # -------------------------------
