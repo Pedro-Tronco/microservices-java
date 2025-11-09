@@ -46,7 +46,6 @@ public class WsProductControllers {
 			throw new AuthenticationException("Usuário sem permissão");
 		
 		var product = convertDto2Entity(dto);
-		product.setStock(10);
 		repository.save(product);
 		
 		return ResponseEntity.status(201).body(product);
@@ -65,7 +64,6 @@ public class WsProductControllers {
 		
 		var product = convertDto2Entity(dto);
 		product.setId(idProduct);
-		product.setStock(10);
 		repository.save(product);
 		
 		return ResponseEntity.status(200).body(product);

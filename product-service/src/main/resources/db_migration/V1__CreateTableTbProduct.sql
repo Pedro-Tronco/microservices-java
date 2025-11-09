@@ -1,10 +1,16 @@
 create table tb_product (
 	id serial not null,
-	description varchar(100) not null,
-	brand varchar(255) not null,
-	model varchar(255) not null,
+	title varchar(255) not null,
+	author varchar(100) not null,
+	synopsis varchar(1024) not null,
+	language varchar(5) not null,
+	publisher varchar(100) not null,
+	file_extension varchar(50) not null,
+	genre_tags varchar(255),
+	page_count int not null,
+	download_url varchar(512) not null,
+	image_url varchar(255) not null,
 	currency varchar(3) not null,
 	price float(53) not null,
-	stock integer not null,
 	primary key (id)
 );

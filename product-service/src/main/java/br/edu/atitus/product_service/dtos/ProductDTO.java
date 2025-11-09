@@ -1,11 +1,16 @@
 package br.edu.atitus.product_service.dtos;
 
 public record ProductDTO(
-		String description, 
-		String brand, 
-		String model, 
-		String currency, 
+		String title,
+		String author,
+		String synopsis,
+		String language,
+		String publisher,
+		String fileExtension,
+		int pageCount,
+		String currency,
 		double price,
+		String downloadUrl,
 		String imageUrl
 		) {
 

@@ -16,18 +16,32 @@ public class ProductEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	private String description;
+	private String title;
 	
-	private String brand;
+	private String author;
 	
-	private String model;
+	private String synopsis;
 	
-	private double price;
+	private String language;
+	
+	private String publisher;
+	
+	@Column(name = "file_extension")
+	private String fileExtension;
+	
+	@Column(name = "page_count")
+	private int pageCount;
+	
+	@Column(name = "download_url")
+	private String downloadUrl;
+	
+	@Column(name="image_url")
+	private String imageUrl;
 	
 	@Column(length = 3)
 	private String currency;
 	
-	private Integer stock;
+	private double price;
 	
 	@Transient
 	private String enviroment;
@@ -35,11 +49,32 @@ public class ProductEntity {
 	@Transient
 	private double convertedPrice;
 	
-	@Column(name="image_url")
-	private String imageUrl;
 
-	
-	
+	public String getFileExtension() {
+		return fileExtension;
+	}
+
+	public void setFileExtension(String fileExtension) {
+		this.fileExtension = fileExtension;
+	}
+
+	public int getPageCount() {
+		return pageCount;
+	}
+
+	public void setPageCount(int pageCount) {
+		this.pageCount = pageCount;
+	}
+
+	public String getDownloadUrl() {
+		return downloadUrl;
+	}
+
+	public void setDownloadUrl(String downloadUrl) {
+		this.downloadUrl = downloadUrl;
+	}
+
+
 	public Long getId() {
 		return id;
 	}
@@ -48,36 +83,52 @@ public class ProductEntity {
 		this.id = id;
 	}
 
-	public String getDescription() {
-		return description;
+	public String getTitle() {
+		return title;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
-	public String getBrand() {
-		return brand;
+	public String getAuthor() {
+		return author;
 	}
 
-	public void setBrand(String brand) {
-		this.brand = brand;
+	public void setAuthor(String author) {
+		this.author = author;
 	}
 
-	public String getModel() {
-		return model;
+	public String getSynopsis() {
+		return synopsis;
 	}
 
-	public void setModel(String model) {
-		this.model = model;
+	public void setSynopsis(String synopsis) {
+		this.synopsis = synopsis;
 	}
 
-	public double getPrice() {
-		return price;
+	public String getLanguage() {
+		return language;
 	}
 
-	public void setPrice(double price) {
-		this.price = price;
+	public void setLanguage(String language) {
+		this.language = language;
+	}
+
+	public String getPublisher() {
+		return publisher;
+	}
+
+	public void setPublisher(String publisher) {
+		this.publisher = publisher;
+	}
+
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
 	}
 
 	public String getCurrency() {
@@ -88,12 +139,12 @@ public class ProductEntity {
 		this.currency = currency;
 	}
 
-	public Integer getStock() {
-		return stock;
+	public double getPrice() {
+		return price;
 	}
 
-	public void setStock(Integer stock) {
-		this.stock = stock;
+	public void setPrice(double price) {
+		this.price = price;
 	}
 
 	public String getEnviroment() {
@@ -112,12 +163,4 @@ public class ProductEntity {
 		this.convertedPrice = convertedPrice;
 	}
 
-	public String getImageUrl() {
-		return imageUrl;
-	}
-
-	public void setImageUrl(String imageUrl) {
-		this.imageUrl = imageUrl;
-	}
-	
 }

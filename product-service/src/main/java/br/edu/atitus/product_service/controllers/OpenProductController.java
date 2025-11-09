@@ -73,7 +73,8 @@ public class OpenProductController {
 			}
 		}
 		
-		cacheManager.getCache(nameCache).put(keyCache, product);
+		if(product.getConvertedPrice() != -1)
+				cacheManager.getCache(nameCache).put(keyCache, product);
 		
 		product.setEnviroment("Product Service running on port: " + serverPort + " | Source: " + dataSource);
 		
@@ -90,7 +91,7 @@ public class OpenProductController {
 	@GetMapping("/{targetCurrency}")
 	public ResponseEntity<Page<ProductEntity>> getAllProducts(
 			@PathVariable String targetCurrency,
-			@PageableDefault(page = 0, size = 5, sort = "description", direction = Direction.ASC)
+			@PageableDefault(page = 0, size = 15, sort = "title", direction = Direction.ASC)
 			Pageable pageable) throws Exception {
 		Page<ProductEntity> products = repository.findAll(pageable);
 		for (ProductEntity product : products) {

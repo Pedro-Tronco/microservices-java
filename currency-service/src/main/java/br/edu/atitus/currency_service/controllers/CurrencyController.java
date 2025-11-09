@@ -115,7 +115,8 @@ public class CurrencyController {
 			}
 		}
 	}
-		
+	
+	
 	cacheManager.getCache(nameCache).put(keyCache, currency);
 	
 	currency.setConvertedValue(value * currency.getConversionRate());
