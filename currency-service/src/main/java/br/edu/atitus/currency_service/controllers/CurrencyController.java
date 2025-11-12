@@ -2,6 +2,7 @@ package br.edu.atitus.currency_service.controllers;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -77,17 +78,13 @@ public class CurrencyController {
 				Calendar cal = Calendar.getInstance();
 			    cal.setTime(new Date());
 			    
-			    int dayOfWeek;
-			    do {
+			    int dayOfWeek = 0;
+			    while (dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY || isHoliday(cal)) {
 			        cal.add(Calendar.DAY_OF_MONTH, -1);
 			        dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
-			    } while (dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY || isHoliday(cal));
+			    }
 
-			    int day = cal.get(Calendar.DAY_OF_MONTH);
-			    int month = cal.get(Calendar.MONTH);
-			    int year = cal.get(Calendar.YEAR);
-			    
-			    String date = month + "-" + day + "-" + year;
+			    String date = (cal.get(Calendar.MONTH) + 1) + "-" + cal.get(Calendar.DAY_OF_MONTH) + "-" + cal.get(Calendar.YEAR);
 				double sourceRate = 1;
 				double targetRate = 1;
 				
@@ -106,7 +103,7 @@ public class CurrencyController {
 				}
 				
 				currency.setConversionRate(sourceRate / targetRate);
-				dataSource = "API BCB";
+				dataSource = "API BCB (" + date + ")";
 			} catch (Exception e) {
 				currency = repository.findBySourceAndTarget(source, target)
 						.orElseThrow(() -> new Exception("Currency not found"));
@@ -133,11 +130,17 @@ public class CurrencyController {
 				  .atZone(ZoneId.systemDefault())
                   .toLocalDate();
 		
-		List<NationalHolidayResponse> holidays = holidayClient.getNationalHolidays(cal.get(Calendar.YEAR));
-	    
+		String keyCache = "HolidayList";
+		String nameCache = "HolidayCache";
+		
+		ArrayList<NationalHolidayResponse> holidays = cacheManager.getCache(nameCache).get(keyCache, ArrayList.class);
+		if(holidays == null || holidays.isEmpty()) {
+			holidays = new ArrayList<>(holidayClient.getNationalHolidays(cal.get(Calendar.YEAR)));
+			cacheManager.getCache(nameCache).put(keyCache, holidays);
+		}
+		
 		for (NationalHolidayResponse holiday : holidays) {
 	    	String dateString = holiday.getDate();
-
 	        LocalDate holidayDate = LocalDate.parse(dateString);
 	    	
 	    	if (targetDate.equals(holidayDate)) {

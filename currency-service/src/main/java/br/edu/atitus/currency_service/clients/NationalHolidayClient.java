@@ -1,5 +1,6 @@
 package br.edu.atitus.currency_service.clients;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.cloud.openfeign.FeignClient;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface NationalHolidayClient {
 
 	@GetMapping("/{year}")
-	List<NationalHolidayResponse> getNationalHolidays(
+	ArrayList<NationalHolidayResponse> getNationalHolidays(
 			@PathVariable int year
 	);
 }
