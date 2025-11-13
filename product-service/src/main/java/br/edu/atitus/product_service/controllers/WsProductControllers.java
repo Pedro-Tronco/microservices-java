@@ -56,8 +56,8 @@ public class WsProductControllers {
 			@PathVariable Long idProduct,
 			@RequestBody ProductDTO dto,
 			@RequestHeader("X-User-Id") Long userId, 
-			@RequestHeader("X-User-Email") Long userEmail, 
-			@RequestHeader("X-User-Type") Long userType ) throws Exception {
+			@RequestHeader("X-User-Email") String userEmail, 
+			@RequestHeader("X-User-Type") int userType ) throws Exception {
 		
 		if (userType != 0)
 			throw new AuthenticationException("Usuário sem permissão");
