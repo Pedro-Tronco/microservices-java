@@ -41,12 +41,12 @@ public class OrderService {
             for (OrderItemEntity item : order.getItems()) {
                 ProductResponse product = productClient.getProductById(item.getProductId());
                 item.setProduct(product);
-                totalPrice += item.getPriceAtPurchase() * item.getQuantity();
+                totalPrice += item.getPriceAtPurchase();
                 
                 CurrencyResponse currencyResponse = currencyClient.getCurrency(
 						item.getPriceAtPurchase(), item.getCurrencyAtPurchase(), targetCurrency);
                 item.setConvertedPriceAtPruchase(currencyResponse.getConvertedValue());
-                totalConvertedPrice += item.getConvertedPriceAtPruchase() * item.getQuantity();
+                totalConvertedPrice += item.getConvertedPriceAtPruchase();
             }
             order.setTotalPrice(totalPrice);
             order.setTotalConvertedPrice(totalConvertedPrice);

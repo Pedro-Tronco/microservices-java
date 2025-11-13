@@ -7,7 +7,6 @@ CREATE TABLE tb_order (
 CREATE TABLE tb_order_item (
     id SERIAL PRIMARY KEY,
     product_id BIGINT NOT NULL,
-    quantity INTEGER NOT NULL,
     price_at_purchase DOUBLE PRECISION NOT NULL,
     currency_at_purchase varchar(3) not null,
     order_id BIGINT,

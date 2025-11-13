@@ -26,8 +26,6 @@ public class OrderItemEntity {
     @Column(nullable = false)
     private Long productId;
 
-    @Column(nullable = false)
-    private Integer quantity;
 
     @Column(nullable = false)
     private double priceAtPurchase; // guarda o preço no momento da compra
@@ -60,14 +58,6 @@ public class OrderItemEntity {
 
 	public void setProductId(Long productId) {
 		this.productId = productId;
-	}
-
-	public Integer getQuantity() {
-		return quantity;
-	}
-
-	public void setQuantity(Integer quantity) {
-		this.quantity = quantity;
 	}
 
 	public double getPriceAtPurchase() {

@@ -50,7 +50,6 @@ public class OrderController {
         List<OrderItemEntity> items = orderDTO.items().stream().map(dto -> {
             OrderItemEntity item = new OrderItemEntity();
             item.setProductId(dto.productId());
-            item.setQuantity(dto.quantity());
 
             // Busca os dados do produto via FeignClient para obter preço, descrição, etc
             ProductResponse product = productClient.getProductById(dto.productId());

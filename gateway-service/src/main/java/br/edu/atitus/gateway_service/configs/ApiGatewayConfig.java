@@ -35,6 +35,9 @@ public class ApiGatewayConfig {
 				.route(p -> p.
 						path("/ws/orders/**")
 						.uri("lb://order-service"))
+				.route(p -> p.
+						path("/ws/inventory/**").
+						uri("lb://inventory-service"))
 				.build();
 	}
 	
