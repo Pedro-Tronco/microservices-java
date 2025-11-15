@@ -1,11 +1,15 @@
 package br.edu.atitus.inventory_service.controllers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.security.sasl.AuthenticationException;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
@@ -28,17 +32,24 @@ import br.edu.atitus.inventory_service.clients.ProductResponse;
 import br.edu.atitus.inventory_service.dtos.InventoryListDTO;
 import br.edu.atitus.inventory_service.entities.InventoryEntity;
 import br.edu.atitus.inventory_service.repositories.InventoryRepository;
+import br.edu.atitus.inventory_service.repositories.QueryInventoryRepository;
 
 @RestController
 @RequestMapping("/ws/inventory")
 public class InventoryController {
 	
+	@Value("${server.port}")
+	private int serverPort;
+	
 	private final InventoryRepository repository;
+	
+	private final QueryInventoryRepository queryRepository;
 	
 	private final ProductClient productClient;
 	
-	public InventoryController(InventoryRepository repository, ProductClient productClient) {
+	public InventoryController(InventoryRepository repository, ProductClient productClient, QueryInventoryRepository queryRepository) {
 		this.repository = repository;
+		this.queryRepository = queryRepository; 
 		this.productClient = productClient;
 	}
 
@@ -51,14 +62,11 @@ public class InventoryController {
 		
 		List<InventoryEntity> items = inventoryDTO.items().stream().map(dto -> {
 			InventoryEntity item = new InventoryEntity();
-			
 			item.setProductId(dto.productId());
 			item.setUserId(userId);
-			
-			ProductResponse response = productClient.getProductById(dto.productId());
-			BeanUtils.copyProperties(response, item);			
-			
 			repository.save(item);
+			BeanUtils.copyProperties(productClient.getProductById(dto.productId()), item);
+			item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
 			return item;
 		}).toList();
 		
@@ -67,14 +75,78 @@ public class InventoryController {
 	
 	@GetMapping
 	public ResponseEntity<Page<InventoryEntity>> getInventory (
+			@RequestParam(required = false) String search,
+			@RequestParam(required = false) String genreTags,
+			@RequestParam(required = false) String lang,
+			@RequestParam(required = false) boolean onlyFavorites,
 			@RequestHeader("X-User-Id") Long userId,
 			@RequestHeader("X-User-Email") String userEmail,
 			@RequestHeader("X-User-Type") Integer userType,
 			@PageableDefault(page = 0, size = 15, sort = "isFavorite", direction = Direction.DESC) 
 			Pageable pageable) {
-		Page<InventoryEntity> inventory = repository.findByUserId(userId, pageable);
 		
-		return ResponseEntity.ok(inventory);
+		var queryHasProductData = false;
+		String productSqlQuery = "SELECT * FROM tb_product WHERE 1 = 1";
+		String inventorySqlQuery = "SELECT * FROM tb_inventory WHERE user_id = " + userId;
+		
+		if(search != null) {
+			queryHasProductData = true;
+			search = search.toLowerCase();
+			productSqlQuery = productSqlQuery + " AND ( LOWER(unaccent(title)) LIKE('%'||unaccent('"+search+"')||'%')";
+			productSqlQuery = productSqlQuery + " OR LOWER(unaccent(author)) LIKE('%'||unaccent('"+search+"')||'%')";
+			productSqlQuery = productSqlQuery + " OR LOWER(unaccent(publisher)) LIKE('%'||unaccent('"+search+"')||'%') )";
+		}
+		
+		if(genreTags != null) {
+			queryHasProductData = true;
+			var firstSearch = true; 
+			productSqlQuery = productSqlQuery + " AND (";
+			
+			String[] genreArray = genreTags.split(","); 
+			List<String> genreList = new ArrayList<>(Arrays.asList(genreArray));
+			for(String genre : genreList){
+				
+				if (firstSearch)
+					firstSearch = false;
+				else
+					productSqlQuery = productSqlQuery + " OR ";
+				productSqlQuery = productSqlQuery + "genre_tags LIKE('%'||'"+genre+"'||'%')";
+			}
+			productSqlQuery = productSqlQuery + " )";
+		}
+		
+		if(lang != null) {
+			queryHasProductData = true;
+			productSqlQuery = productSqlQuery + " AND language = '"+lang.toLowerCase()+"'";
+		}
+		
+		if(queryHasProductData) {
+			List<Long> productIdList = productClient.getProductIdFromQuery(productSqlQuery);
+			if(productIdList.isEmpty())
+				return ResponseEntity.ok(Page.empty(pageable));
+			inventorySqlQuery = inventorySqlQuery + " AND product_id IN(";
+			var firstSearch = true; 
+			for(Long productId : productIdList) {
+				if (firstSearch)
+					firstSearch = false;
+				else
+					inventorySqlQuery = inventorySqlQuery + ", ";
+				inventorySqlQuery = inventorySqlQuery + productId;
+			}
+			inventorySqlQuery = inventorySqlQuery + ")";
+		}
+
+		if(onlyFavorites)
+			inventorySqlQuery = inventorySqlQuery + " AND is_favorite = TRUE";
+		
+		List<InventoryEntity> inventoryList = queryRepository.findByQuery(inventorySqlQuery, pageable)
+				.stream().map(item -> {
+			BeanUtils.copyProperties(productClient.getProductById(item.getProductId()), item);
+			item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
+			return item;
+		}).toList();
+		Page<InventoryEntity> inventoryPage = new PageImpl<InventoryEntity>(inventoryList, pageable, inventoryList.size());
+		return ResponseEntity.ok(inventoryPage);
 	}
 	
 	@PutMapping("/favorite/{productId}") 
@@ -95,7 +167,8 @@ public class InventoryController {
 			item.setFavorite(false);
 		
 		repository.save(item);
-		
+		BeanUtils.copyProperties(productClient.getProductById(item.getProductId()), item);
+		item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
 		return ResponseEntity.ok(item);
 		
 	}

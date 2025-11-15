@@ -1,5 +1,7 @@
 package br.edu.atitus.product_service.controllers;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
@@ -10,12 +12,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.edu.atitus.product_service.clients.CurrencyClient;
 import br.edu.atitus.product_service.clients.CurrencyResponse;
 import br.edu.atitus.product_service.entities.ProductEntity;
 import br.edu.atitus.product_service.repositories.ProductRepository;
+import br.edu.atitus.product_service.repositories.QueryProductRepository;
 
 @RestController
 @RequestMapping("products")
@@ -23,15 +27,18 @@ public class OpenProductController {
 
 	private final ProductRepository repository;
 	
+	private final QueryProductRepository queryRepository;
+	
 	private final CurrencyClient currencyClient;
 	
 	private final CacheManager cacheManager;
 
-	public OpenProductController(ProductRepository repository, CurrencyClient currencyClient, CacheManager cacheManager) {
+	public OpenProductController(ProductRepository repository, CurrencyClient currencyClient, CacheManager cacheManager, QueryProductRepository queryRepository) {
 		super();
 		this.repository = repository;
 		this.currencyClient = currencyClient;
 		this.cacheManager = cacheManager;
+		this.queryRepository = queryRepository;
 	}
 	
 	@Value("${server.port}")
@@ -103,5 +110,15 @@ public class OpenProductController {
 		}
 		
 		return ResponseEntity.ok(products);
+	}
+	
+	@GetMapping("/query")
+	public ResponseEntity<List<Long>> getProductsfromQuery(@RequestParam(required = true) String sqlQuery) {
+		List<ProductEntity> productList = queryRepository.findByQuery(sqlQuery);
+		List<Long> idList = productList.stream().map(product -> {
+			Long productId = product.getId();
+			return productId;
+		}).toList();
+		return ResponseEntity.ok(idList);
 	}
 }

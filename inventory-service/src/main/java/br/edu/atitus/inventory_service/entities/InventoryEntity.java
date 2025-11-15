@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @IdClass(InventoryId.class)
@@ -25,31 +26,36 @@ public class InventoryEntity {
 
     @Column(name = "bookmarks")
     private String bookmarks;
-
+    
+    @Transient
     private String title;
+	
+    @Transient
+	private String author;
+	
+    @Transient
+	private String synopsis;
+	
+    @Transient
+	private String language;
+	
+    @Transient
+	private String publisher;
+	
+    @Transient
+	private String fileExtension;
+	
+    @Transient
+	private int pageCount;
+	
+    @Transient
+	private String downloadUrl;
+	
+    @Transient
+	private String imageUrl;
     
-    private String author;
-    
-    private String synopsis;
-    
-    private String language;
-    
-    private String publisher;
-    
-    @Column(name = "file_extension")
-    private String fileExtension;
-    
-    @Column(name = "genre_tags")
-    private String genreTags;
-    
-    @Column(name = "page_count")
-    private int pageCount;
-    
-    @Column(name = "download_url")
-    private String downloadUrl;
-    
-    @Column(name = "image_url")
-    private String imageUrl;
+    @Transient
+    private String enviroment;
     
     public InventoryEntity() {}
     
@@ -57,7 +63,7 @@ public class InventoryEntity {
         this.userId = userId;
         this.productId = productId;
     }
-    
+
 	public Long getUserId() {
 		return userId;
 	}
@@ -130,20 +136,12 @@ public class InventoryEntity {
 		this.publisher = publisher;
 	}
 
-	public String getfileExtension() {
+	public String getFileExtension() {
 		return fileExtension;
 	}
 
-	public void setfileExtension(String fileExtension) {
+	public void setFileExtension(String fileExtension) {
 		this.fileExtension = fileExtension;
-	}
-
-	public String getGenreTags() {
-		return genreTags;
-	}
-
-	public void setGenreTags(String genreTags) {
-		this.genreTags = genreTags;
 	}
 
 	public int getPageCount() {
@@ -169,6 +167,13 @@ public class InventoryEntity {
 	public void setImageUrl(String imageUrl) {
 		this.imageUrl = imageUrl;
 	}
-	
-	
+
+	public String getEnviroment() {
+		return enviroment;
+	}
+
+	public void setEnviroment(String enviroment) {
+		this.enviroment = enviroment;
+	}
+    
 }

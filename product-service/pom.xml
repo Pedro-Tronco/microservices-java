@@ -94,6 +94,11 @@
 			<artifactId>micrometer-registry-prometheus</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.5.0</version>
+		</dependency>
 		
 		<!--Conexão entre Micrometer e Brave. O Micrometer (a API de rastreamento do Spring) usa o Brave como implementação subjacente para criar os spans (partes da transação) e traces (o caminho completo da transação). Esta dependência é a ponte que os conecta.-->
 		<dependency>

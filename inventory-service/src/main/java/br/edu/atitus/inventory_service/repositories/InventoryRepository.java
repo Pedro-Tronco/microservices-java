@@ -16,10 +16,6 @@ public interface InventoryRepository extends JpaRepository<InventoryEntity, Inve
 	InventoryEntity findByUserIdAndProductId(Long userId, Long productId);
 	
 	Page<InventoryEntity> findByUserId(Long userId, Pageable pageable);
-	
-	Page<InventoryEntity> findByUserIdAndProductIdIn(Long userId, List<Long> productId, Pageable pageable);
-	
-	Page<InventoryEntity> findByUserIdAndTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(Long userId, String title, String author, Pageable pageable);
-	
+
 	
 }
