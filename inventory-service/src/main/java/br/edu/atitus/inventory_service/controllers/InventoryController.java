@@ -84,7 +84,7 @@ public class InventoryController {
 	@GetMapping
 	public ResponseEntity<Page<InventoryEntity>> getInventory (
 			@RequestParam(required = false) String search,
-			@RequestParam(required = false) String genreTags,
+			@RequestParam(required = false) String genreTag,
 			@RequestParam(required = false) String lang,
 			@RequestParam(required = false) boolean onlyFavorites,
 			@RequestHeader("X-User-Id") Long userId,
@@ -108,20 +108,20 @@ public class InventoryController {
 			productSqlQuery = productSqlQuery + " OR LOWER(unaccent(publisher)) LIKE('%'||unaccent('"+search+"')||'%') )";
 		}
 		
-		if(genreTags != null) {
+		if(genreTag != null) {
 			queryHasProductData = true;
 			var firstSearch = true; 
 			productSqlQuery = productSqlQuery + " AND (";
 			
-			String[] genreArray = genreTags.split(","); 
+			String[] genreArray = genreTag.split(","); 
 			List<String> genreList = new ArrayList<>(Arrays.asList(genreArray));
 			for(String genre : genreList){
-				
+				String formatedGenre = String.format("%02d", Integer.parseInt(genre));
 				if (firstSearch)
 					firstSearch = false;
 				else
 					productSqlQuery = productSqlQuery + " OR ";
-				productSqlQuery = productSqlQuery + "genre_tags LIKE('%'||'"+genre+"'||'%')";
+				productSqlQuery = productSqlQuery + "genre_tags LIKE('%'||'"+formatedGenre+"'||'%')";
 			}
 			productSqlQuery = productSqlQuery + " )";
 		}

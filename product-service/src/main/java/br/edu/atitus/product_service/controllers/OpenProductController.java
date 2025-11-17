@@ -1,5 +1,7 @@
 package br.edu.atitus.product_service.controllers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -109,10 +111,51 @@ public class OpenProductController {
 	
 	@GetMapping("/{targetCurrency}")
 	public ResponseEntity<Page<ProductEntity>> getAllProducts(
+			@RequestParam(required = false) String search,
+			@RequestParam(required = false) String genreTag,
+			@RequestParam(required = false) String lang,
 			@PathVariable String targetCurrency,
 			@PageableDefault(page = 0, size = 15, sort = "title", direction = Direction.ASC)
 			Pageable pageable) throws Exception {
-		Page<ProductEntity> products = repository.findAll(pageable);
+		
+		String productSqlQuery = "SELECT * FROM tb_product WHERE 1 = 1";
+		
+		if(search != null) {
+			search = search.toLowerCase();
+			productSqlQuery = productSqlQuery + " AND ( LOWER(unaccent(title)) LIKE('%'||unaccent('"+search+"')||'%')";
+			productSqlQuery = productSqlQuery + " OR LOWER(unaccent(author)) LIKE('%'||unaccent('"+search+"')||'%')";
+			productSqlQuery = productSqlQuery + " OR LOWER(unaccent(publisher)) LIKE('%'||unaccent('"+search+"')||'%') )";
+		}
+		
+		if(genreTag != null) {
+			var firstSearch = true; 
+			productSqlQuery = productSqlQuery + " AND (";
+			
+			String[] genreArray = genreTag.split(","); 
+			List<String> genreList = new ArrayList<>(Arrays.asList(genreArray));
+			for(String genre : genreList){
+				String formatedGenre = String.format("%02d", Integer.parseInt(genre));
+				if (firstSearch)
+					firstSearch = false;
+				else
+					productSqlQuery = productSqlQuery + " OR ";
+				productSqlQuery = productSqlQuery + "genre_tags LIKE('%'||'"+formatedGenre+"'||'%')";
+			}
+			productSqlQuery = productSqlQuery + " )";
+		}
+		
+		if(lang != null) {
+			productSqlQuery = productSqlQuery + " AND language = '"+lang.toLowerCase()+"'";
+		}
+		
+		List<Long> productIdList = queryRepository.findByQuery(productSqlQuery)
+				.stream().map(product -> {
+					Long productId = product.getId();
+					return productId;
+				}).toList();
+		
+		Page<ProductEntity> products = repository.findAllByIdIn(productIdList, pageable);
+		
 		for (ProductEntity product : products) {
 			CurrencyResponse currency = currencyClient.getCurrency(product.getPrice(), product.getCurrency(), targetCurrency);
 			
