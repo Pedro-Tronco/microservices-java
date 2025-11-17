@@ -3,7 +3,7 @@ package br.edu.atitus.inventory_service.entities;
 import java.sql.Timestamp;
 import java.util.List;
 
-import br.edu.atitus.inventory_service.dtos.GenreTagDTO;
+import br.edu.atitus.inventory_service.clients.GenreTagResponse;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -28,10 +28,13 @@ public class InventoryEntity {
     private boolean isFavorite;
 
     @Column(name = "bookmarks")
-    private String bookmarks;
+    private String bookmarksString;
     
     @Column(name = "last_access")
     private Timestamp lastAccess;
+    
+    @Transient
+    private List<BookmarksEntity> bookmarksList;
     
     @Transient
     private String title;
@@ -64,7 +67,7 @@ public class InventoryEntity {
     private String genreTagsString;
     
     @Transient
-	private List<GenreTagDTO> genreTagsList;
+	private List<GenreTagResponse> genreTagsList;
     
     @Transient
     private String enviroment;
@@ -76,11 +79,11 @@ public class InventoryEntity {
         this.productId = productId;
     }
 
-	public List<GenreTagDTO> getGenreTagsList() {
+	public List<GenreTagResponse> getGenreTagsList() {
 		return genreTagsList;
 	}
 
-	public void setGenreTagsList(List<GenreTagDTO> genreTagsList) {
+	public void setGenreTagsList(List<GenreTagResponse> genreTagsList) {
 		this.genreTagsList = genreTagsList;
 	}
 
@@ -106,14 +109,6 @@ public class InventoryEntity {
 
 	public void setFavorite(boolean isFavorite) {
 		this.isFavorite = isFavorite;
-	}
-
-	public String getBookmarks() {
-		return bookmarks;
-	}
-
-	public void setBookmarks(String bookmarks) {
-		this.bookmarks = bookmarks;
 	}
 
 	public String getTitle() {
@@ -210,6 +205,22 @@ public class InventoryEntity {
 
 	public void setGenreTagsString(String genreTagsString) {
 		this.genreTagsString = genreTagsString;
+	}
+
+	public String getBookmarksString() {
+		return bookmarksString;
+	}
+
+	public void setBookmarksString(String bookmarksString) {
+		this.bookmarksString = bookmarksString;
+	}
+
+	public List<BookmarksEntity> getBookmarksList() {
+		return bookmarksList;
+	}
+
+	public void setBookmarksList(List<BookmarksEntity> bookmarksList) {
+		this.bookmarksList = bookmarksList;
 	}
     
 }

@@ -2,8 +2,6 @@ package br.edu.atitus.inventory_service.clients;
 
 import java.util.List;
 
-import br.edu.atitus.inventory_service.dtos.GenreTagDTO;
-
 public record ProductResponse(
 	    Long id,
 	    String title,
@@ -17,5 +15,5 @@ public record ProductResponse(
 		String imageUrl,
 		String enviroment,
 		String genreTagsString,
-		List<GenreTagDTO> genreTagsList
+		List<GenreTagResponse> genreTagsList
 	) {}

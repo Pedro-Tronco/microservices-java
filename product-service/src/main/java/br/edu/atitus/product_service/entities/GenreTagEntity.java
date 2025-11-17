@@ -12,7 +12,6 @@ import jakarta.validation.constraints.NotNull;
 public class GenreTagEntity {
 
 	@Id
-	@NotNull
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	

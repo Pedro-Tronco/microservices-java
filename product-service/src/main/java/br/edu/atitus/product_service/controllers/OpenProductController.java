@@ -34,7 +34,7 @@ public class OpenProductController {
 	
 	private final CurrencyClient currencyClient;
 	
-	private final GenreTagController genreController;
+	private final GenreTagController tagsController;
 	
 	private final CacheManager cacheManager;
 
@@ -43,14 +43,14 @@ public class OpenProductController {
 			CurrencyClient currencyClient, 
 			CacheManager cacheManager, 
 			QueryProductRepository queryRepository,
-			GenreTagController genreController
+			GenreTagController tagsController
 			) {
 		super();
 		this.repository = repository;
 		this.currencyClient = currencyClient;
 		this.cacheManager = cacheManager;
 		this.queryRepository = queryRepository;
-		this.genreController = genreController;
+		this.tagsController = tagsController;
 	}
 	
 	@Value("${server.port}")
@@ -90,7 +90,7 @@ public class OpenProductController {
 				dataSource = "Currency Service (" + currency.getEnviroment() + ")";
 				
 			}
-			product.setGenreTagsList(genreController.getTagsListFromString(product.getGenreTagsString()));
+			product.setGenreTagsList(tagsController.getTagsListFromString(product.getGenreTagsString()));
 		}
 		
 		if(product.getConvertedPrice() != -1)
@@ -105,7 +105,7 @@ public class OpenProductController {
 	public ResponseEntity<ProductEntity> getNoConverter(@PathVariable Long idProduct) throws Exception {
 		var product = repository.findById(idProduct).orElseThrow(() -> new Exception("Produto não encontrado!"));
 		product.setEnviroment("Product-service running on Port: " + serverPort);
-		product.setGenreTagsList(genreController.getTagsListFromString(product.getGenreTagsString()));
+		product.setGenreTagsList(tagsController.getTagsListFromString(product.getGenreTagsString()));
 		return ResponseEntity.ok(product);
 	}
 	
@@ -160,7 +160,7 @@ public class OpenProductController {
 			CurrencyResponse currency = currencyClient.getCurrency(product.getPrice(), product.getCurrency(), targetCurrency);
 			
 			product.setConvertedPrice(currency.getConvertedValue());
-			product.setGenreTagsList(genreController.getTagsListFromString(product.getGenreTagsString()));
+			product.setGenreTagsList(tagsController.getTagsListFromString(product.getGenreTagsString()));
 			product.setEnviroment("Product-service running on port: " + serverPort + " - " + currency.getEnviroment());
 		}
 		

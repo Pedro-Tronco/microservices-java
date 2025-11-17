@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,16 +17,19 @@ import br.edu.atitus.product_service.repositories.GenreTagRepository;
 @RequestMapping("products/tags")
 public class GenreTagController {
 	
-	private final GenreTagRepository tagRepository;
+	private final GenreTagRepository repository;
 	
-	public GenreTagController(GenreTagRepository tagRepository) {
-		this.tagRepository = tagRepository;
+	public GenreTagController(GenreTagRepository repository) {
+		this.repository = repository;
 	}
 	
-	@Value("${server.port}")
-	private int serverPort;
+	@GetMapping
+	public ResponseEntity<List<GenreTagEntity>> getAll() {
+		List<GenreTagEntity> genreList = repository.findAll();
+		return ResponseEntity.ok(genreList);
+	}
 	
-	@GetMapping("/from-string/{genreTagsString}")
+	@GetMapping("/{genreTagsString}")
 	public List<GenreTagEntity> getTagsListFromString(
 			@PathVariable String genreTagsString) {
 		String[] tagsStringArray = genreTagsString.split(",");
@@ -34,7 +37,7 @@ public class GenreTagController {
 				.map(Long::parseLong)
                 .toArray(Long[]::new);
 		List<Long> tagsLongList = new ArrayList<>(Arrays.asList(tagsLongArray));
-		List<GenreTagEntity> genreTagsList = tagRepository.findAllById(tagsLongList);
+		List<GenreTagEntity> genreTagsList = repository.findAllById(tagsLongList);
 		return genreTagsList;
 	}
 }
