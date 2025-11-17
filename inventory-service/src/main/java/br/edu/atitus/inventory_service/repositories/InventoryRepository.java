@@ -1,7 +1,5 @@
 package br.edu.atitus.inventory_service.repositories;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,6 +14,5 @@ public interface InventoryRepository extends JpaRepository<InventoryEntity, Inve
 	InventoryEntity findByUserIdAndProductId(Long userId, Long productId);
 	
 	Page<InventoryEntity> findByUserId(Long userId, Pageable pageable);
-
 	
 }

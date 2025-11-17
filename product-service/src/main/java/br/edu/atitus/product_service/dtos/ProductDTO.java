@@ -7,7 +7,7 @@ public record ProductDTO(
 		String language,
 		String publisher,
 		String fileExtension,
-		String genreTags,
+		String genreTagsString,
 		int pageCount,
 		String currency,
 		double price,

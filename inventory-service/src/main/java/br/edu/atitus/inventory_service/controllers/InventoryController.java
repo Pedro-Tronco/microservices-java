@@ -1,18 +1,24 @@
 package br.edu.atitus.inventory_service.controllers;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.security.sasl.AuthenticationException;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
+import org.springframework.data.web.SortDefault.SortDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -64,6 +70,8 @@ public class InventoryController {
 			InventoryEntity item = new InventoryEntity();
 			item.setProductId(dto.productId());
 			item.setUserId(userId);
+			Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+			item.setLastAccess(currentTimestamp);
 			repository.save(item);
 			BeanUtils.copyProperties(productClient.getProductById(dto.productId()), item);
 			item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
@@ -82,8 +90,11 @@ public class InventoryController {
 			@RequestHeader("X-User-Id") Long userId,
 			@RequestHeader("X-User-Email") String userEmail,
 			@RequestHeader("X-User-Type") Integer userType,
-			@PageableDefault(page = 0, size = 15, sort = "isFavorite", direction = Direction.DESC) 
-			Pageable pageable) {
+			@PageableDefault(page = 0, size = 15) 
+			@SortDefaults({
+                @SortDefault(sort = "favorite", direction = Sort.Direction.DESC),
+                @SortDefault(sort = "lastAccess", direction = Sort.Direction.DESC)
+            }) Pageable pageable) {
 		
 		var queryHasProductData = false;
 		String productSqlQuery = "SELECT * FROM tb_product WHERE 1 = 1";
@@ -139,14 +150,36 @@ public class InventoryController {
 		if(onlyFavorites)
 			inventorySqlQuery = inventorySqlQuery + " AND is_favorite = TRUE";
 		
-		List<InventoryEntity> inventoryList = queryRepository.findByQuery(inventorySqlQuery, pageable)
+		ArrayList<InventoryEntity> inventoryList = queryRepository.findByQuery(inventorySqlQuery)
 				.stream().map(item -> {
 			BeanUtils.copyProperties(productClient.getProductById(item.getProductId()), item);
 			item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
 			return item;
-		}).toList();
+		}).collect(Collectors.toCollection(ArrayList::new));
+		inventoryList.sort(
+				Comparator.comparing(InventoryEntity::isFavorite)
+				.thenComparing(InventoryEntity::getLastAccess).reversed()
+				);
 		Page<InventoryEntity> inventoryPage = new PageImpl<InventoryEntity>(inventoryList, pageable, inventoryList.size());
+		
 		return ResponseEntity.ok(inventoryPage);
+	}
+	
+	@GetMapping("/{productId}")
+	public ResponseEntity<InventoryEntity> getByProductId(
+			@PathVariable Long productId,
+			@RequestHeader("X-User-Id") Long userId, 
+			@RequestHeader("X-User-Email") String userEmail, 
+			@RequestHeader("X-User-Type") int userType) throws Exception {
+		var item = repository.findByUserIdAndProductId(userId, productId);
+		if(item == null)
+			throw new Exception("Product not found for user");
+		
+		Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+		item.setLastAccess(currentTimestamp);
+		repository.save(item);
+		BeanUtils.copyProperties(productClient.getProductById(item.getProductId()), item);
+		return ResponseEntity.ok(item);
 	}
 	
 	@PutMapping("/favorite/{productId}") 
@@ -173,10 +206,12 @@ public class InventoryController {
 		
 	}
 	
+	
+	
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<String> handler(Exception e) {
 		String message = e.getMessage().replaceAll("[\\r\\n]", "");
 		return ResponseEntity.status(403).body(message);
 	}
-			
+	
 }

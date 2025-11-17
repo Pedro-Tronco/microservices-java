@@ -1,5 +1,7 @@
 package br.edu.atitus.product_service.entities;
 
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -43,13 +45,18 @@ public class ProductEntity {
 	
 	private double price;
 	
+	@Column(name = "genre_tags")
+	private String genreTagsString;
+	
+	@Transient
+	private List<GenreTagEntity> genreTagsList;
+	
 	@Transient
 	private String enviroment;
 	
 	@Transient
 	private double convertedPrice;
 	
-
 	public String getFileExtension() {
 		return fileExtension;
 	}
@@ -161,6 +168,22 @@ public class ProductEntity {
 
 	public void setConvertedPrice(double convertedPrice) {
 		this.convertedPrice = convertedPrice;
+	}
+
+	public String getGenreTagsString() {
+		return genreTagsString;
+	}
+
+	public void setGenreTagsString(String genreTagsString) {
+		this.genreTagsString = genreTagsString;
+	}
+
+	public List<GenreTagEntity> getGenreTagsList() {
+		return genreTagsList;
+	}
+
+	public void setGenreTagsList(List<GenreTagEntity> genreTagsList) {
+		this.genreTagsList = genreTagsList;
 	}
 
 }

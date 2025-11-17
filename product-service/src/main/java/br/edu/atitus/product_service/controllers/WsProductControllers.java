@@ -23,10 +23,13 @@ import br.edu.atitus.product_service.repositories.ProductRepository;
 public class WsProductControllers {
 
 	private final ProductRepository repository;
+	
+	private final GenreTagController genreController;
 
-	public WsProductControllers(ProductRepository repository) {
+	public WsProductControllers(ProductRepository repository, GenreTagController genreController) {
 		super();
 		this.repository = repository;
+		this.genreController = genreController;
 	}
 	
 	private ProductEntity convertDto2Entity(ProductDTO dto) {

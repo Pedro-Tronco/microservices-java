@@ -1,7 +1,10 @@
 package br.edu.atitus.inventory_service.entities;
 
+import java.sql.Timestamp;
+import java.util.List;
+
+import br.edu.atitus.inventory_service.dtos.GenreTagDTO;
 import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
@@ -26,6 +29,9 @@ public class InventoryEntity {
 
     @Column(name = "bookmarks")
     private String bookmarks;
+    
+    @Column(name = "last_access")
+    private Timestamp lastAccess;
     
     @Transient
     private String title;
@@ -55,6 +61,12 @@ public class InventoryEntity {
 	private String imageUrl;
     
     @Transient
+    private String genreTagsString;
+    
+    @Transient
+	private List<GenreTagDTO> genreTagsList;
+    
+    @Transient
     private String enviroment;
     
     public InventoryEntity() {}
@@ -63,6 +75,14 @@ public class InventoryEntity {
         this.userId = userId;
         this.productId = productId;
     }
+
+	public List<GenreTagDTO> getGenreTagsList() {
+		return genreTagsList;
+	}
+
+	public void setGenreTagsList(List<GenreTagDTO> genreTagsList) {
+		this.genreTagsList = genreTagsList;
+	}
 
 	public Long getUserId() {
 		return userId;
@@ -174,6 +194,22 @@ public class InventoryEntity {
 
 	public void setEnviroment(String enviroment) {
 		this.enviroment = enviroment;
+	}
+
+	public Timestamp getLastAccess() {
+		return lastAccess;
+	}
+
+	public void setLastAccess(Timestamp lastAccess) {
+		this.lastAccess = lastAccess;
+	}
+	
+	public String getGenreTagsString() {
+		return genreTagsString;
+	}
+
+	public void setGenreTagsString(String genreTagsString) {
+		this.genreTagsString = genreTagsString;
 	}
     
 }
