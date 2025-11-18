@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.security.sasl.AuthenticationException;
@@ -22,6 +23,7 @@ import org.springframework.data.web.SortDefault.SortDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +41,7 @@ import br.edu.atitus.inventory_service.dtos.InventoryListDTO;
 import br.edu.atitus.inventory_service.entities.InventoryEntity;
 import br.edu.atitus.inventory_service.repositories.InventoryRepository;
 import br.edu.atitus.inventory_service.repositories.QueryInventoryRepository;
+import jakarta.ws.rs.NotFoundException;
 
 @RestController
 @RequestMapping("/ws/inventory")
@@ -53,10 +56,13 @@ public class InventoryController {
 	
 	private final ProductClient productClient;
 	
-	public InventoryController(InventoryRepository repository, ProductClient productClient, QueryInventoryRepository queryRepository) {
+	private final BookmarksController bookmarksController;
+	
+	public InventoryController(InventoryRepository repository, ProductClient productClient, QueryInventoryRepository queryRepository, BookmarksController bookmarksController) {
 		this.repository = repository;
 		this.queryRepository = queryRepository; 
 		this.productClient = productClient;
+		this.bookmarksController = bookmarksController;
 	}
 
 	@PostMapping
@@ -74,11 +80,25 @@ public class InventoryController {
 			item.setLastAccess(currentTimestamp);
 			repository.save(item);
 			BeanUtils.copyProperties(productClient.getProductById(dto.productId()), item);
+			item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
 			item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
 			return item;
 		}).toList();
 		
 		return ResponseEntity.status(HttpStatus.CREATED).body(items);
+	}
+	
+	@DeleteMapping
+	public ResponseEntity<String> deleteFromInventory(
+			@RequestBody InventoryListDTO inventoryDTO,
+			@RequestHeader("X-User-Id") Long userId,
+			@RequestHeader("X-User-Email") String userEmail,
+			@RequestHeader("X-User-Type") Integer userType) {
+		
+		inventoryDTO.items().stream().forEach(dto -> {
+			repository.deleteByUserIdAndProductId(userId, dto.productId());
+		});
+		return ResponseEntity.ok("Item(s) removed from inventory");
 	}
 	
 	@GetMapping
@@ -87,6 +107,7 @@ public class InventoryController {
 			@RequestParam(required = false) String genreTag,
 			@RequestParam(required = false) String lang,
 			@RequestParam(required = false) boolean onlyFavorites,
+			@RequestParam(required = false) String bookmark,
 			@RequestHeader("X-User-Id") Long userId,
 			@RequestHeader("X-User-Email") String userEmail,
 			@RequestHeader("X-User-Type") Integer userType,
@@ -150,10 +171,28 @@ public class InventoryController {
 		if(onlyFavorites)
 			inventorySqlQuery = inventorySqlQuery + " AND is_favorite = TRUE";
 		
+		if(bookmark != null) {
+			var firstSearch = true; 
+			inventorySqlQuery = inventorySqlQuery + " AND (";
+			
+			String[] bookmarkArray = bookmark.split(","); 
+			List<String> bookmarkList = new ArrayList<>(Arrays.asList(bookmarkArray));
+			for(String bookmarkId : bookmarkList){
+				String formatedBookmark = String.format("%02d", Integer.parseInt(bookmarkId));
+				if (firstSearch)
+					firstSearch = false;
+				else
+					inventorySqlQuery = inventorySqlQuery + " OR ";
+				inventorySqlQuery = inventorySqlQuery + "bookmarks LIKE('%'||'"+formatedBookmark+"'||'%')";
+			}
+			inventorySqlQuery = inventorySqlQuery + " )";
+		}
+		
 		ArrayList<InventoryEntity> inventoryList = queryRepository.findByQuery(inventorySqlQuery)
 				.stream().map(item -> {
 			BeanUtils.copyProperties(productClient.getProductById(item.getProductId()), item);
 			item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
+			item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
 			return item;
 		}).collect(Collectors.toCollection(ArrayList::new));
 		inventoryList.sort(
@@ -173,12 +212,13 @@ public class InventoryController {
 			@RequestHeader("X-User-Type") int userType) throws Exception {
 		var item = repository.findByUserIdAndProductId(userId, productId);
 		if(item == null)
-			throw new Exception("Product not found for user");
+			throw new NotFoundException("Product not found for user");
 		
 		Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
 		item.setLastAccess(currentTimestamp);
 		repository.save(item);
 		BeanUtils.copyProperties(productClient.getProductById(item.getProductId()), item);
+		item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
 		return ResponseEntity.ok(item);
 	}
 	
@@ -192,7 +232,7 @@ public class InventoryController {
 		var item = repository.findByUserIdAndProductId(userId, productId);
 		
 		if(item == null)
-			throw new Exception("Product not found for user");
+			throw new NotFoundException("Product not found for user");
 		
 		if(item.isFavorite() == false)
 			item.setFavorite(true);
@@ -202,16 +242,71 @@ public class InventoryController {
 		repository.save(item);
 		BeanUtils.copyProperties(productClient.getProductById(item.getProductId()), item);
 		item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
+		item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
 		return ResponseEntity.ok(item);
 		
 	}
 	
+	@PutMapping("/bookmarks/add/{bookmarkId}")
+	public ResponseEntity<List<InventoryEntity>> addBookmarkIdToItem(
+			@PathVariable Long bookmarkId,
+			@RequestBody InventoryListDTO inventoryDTO,
+			@RequestHeader("X-User-Id") Long userId, 
+			@RequestHeader("X-User-Email") String userEmail, 
+			@RequestHeader("X-User-Type") int userType ) throws Exception {
+		List<InventoryEntity> items = inventoryDTO.items().stream().map(dto -> {
+			var item = repository.findByUserIdAndProductId(userId, dto.productId());
+			if (item.getProductId() == null)
+				throw new NotFoundException("Item not found in Inventory");
+			String bookmarkIdFormated = String.format("%02d", bookmarkId);
+			if(item.getBookmarksString() == null||!item.getBookmarksString().contains(bookmarkIdFormated)) {
+				if (item.getBookmarksString() == null||item.getBookmarksString().isEmpty())
+					item.setBookmarksString(bookmarkIdFormated);
+				else
+					item.setBookmarksString(item.getBookmarksString() + ","+bookmarkIdFormated);
+			}
+			BeanUtils.copyProperties(productClient.getProductById(dto.productId()), item);
+			item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
+			item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
+			repository.save(item);
+			return item;
+		}).toList();
+		return ResponseEntity.status(200).body(items);
+	}
 	
+	@PutMapping("/bookmarks/remove/{bookmarkId}")
+	public ResponseEntity<List<InventoryEntity>> removeBookmarkIdFromItem(
+			@PathVariable Long bookmarkId,
+			@RequestBody InventoryListDTO inventoryDTO,
+			@RequestHeader("X-User-Id") Long userId, 
+			@RequestHeader("X-User-Email") String userEmail, 
+			@RequestHeader("X-User-Type") int userType ) throws Exception {
+		List<InventoryEntity> items = inventoryDTO.items().stream().map(dto -> {
+			var item = repository.findByUserIdAndProductId(userId, dto.productId());
+			if (item == null)
+				throw new NotFoundException("Item not found in Inventory");
+			String bookmarkIdFormated = String.format("%02d", bookmarkId);
+			if(item.getBookmarksString().contains(bookmarkIdFormated)) {
+				if (item.getBookmarksString().length() > 2) {
+					bookmarkIdFormated = bookmarkIdFormated+",";
+					item.setBookmarksString((item.getBookmarksString()+",").replace(bookmarkIdFormated, "").substring(0,item.getBookmarksString().length() - 3));
+				} else {
+					item.setBookmarksString("");
+				}
+			}
+			BeanUtils.copyProperties(productClient.getProductById(dto.productId()), item);
+			item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
+			item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
+			repository.save(item);
+			return item;
+		}).toList();
+		return ResponseEntity.status(200).body(items);
+	}
 	
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<String> handler(Exception e) {
+	@ExceptionHandler(NotFoundException.class)
+	public ResponseEntity<String> handler(NotFoundException e) {
 		String message = e.getMessage().replaceAll("[\\r\\n]", "");
-		return ResponseEntity.status(403).body(message);
+		return ResponseEntity.status(404).body(message);
 	}
 	
 }

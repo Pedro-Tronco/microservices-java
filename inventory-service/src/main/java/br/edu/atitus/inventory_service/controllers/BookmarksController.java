@@ -3,12 +3,8 @@ package br.edu.atitus.inventory_service.controllers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
-
-import javax.security.sasl.AuthenticationException;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,9 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.edu.atitus.inventory_service.dtos.BookmarkDTO;
-import br.edu.atitus.inventory_service.dtos.InventoryListDTO;
 import br.edu.atitus.inventory_service.entities.BookmarksEntity;
 import br.edu.atitus.inventory_service.repositories.BookmarksRepository;
+import jakarta.ws.rs.NotFoundException;
 
 @RestController
 @RequestMapping("/ws/inventory/bookmarks")
@@ -39,14 +35,12 @@ public class BookmarksController {
 	@GetMapping("/{bookmarksString}")
 	public List<BookmarksEntity> findBookmarksByBookmarkString(
 			@PathVariable String bookmarksString,
-			@RequestHeader("X-User-Id") Long userId,
-			@RequestHeader("X-User-Email") String userEmail,
-			@RequestHeader("X-User-Type") Integer userType) {
+			@RequestHeader("X-User-Id") Long userId) {
 		String[] bookmarksStringArray = bookmarksString.split(",");
-		UUID[] bookmarksLongArray = Arrays.stream(bookmarksStringArray)
-				.map(UUID::fromString)
-				.toArray(UUID[]::new);
-		List<UUID> bookmarksLongList = new ArrayList<>(Arrays.asList(bookmarksLongArray));
+		Long[] bookmarksLongArray = Arrays.stream(bookmarksStringArray)
+				.map(Long::parseLong)
+				.toArray(Long[]::new);
+		List<Long> bookmarksLongList = new ArrayList<>(Arrays.asList(bookmarksLongArray));
 		List<BookmarksEntity> bookmarksList = repository.findAllByUserIdAndBookmarkIdIn(userId, bookmarksLongList);
 		return bookmarksList;
 	}
@@ -55,10 +49,8 @@ public class BookmarksController {
 	public ResponseEntity<List<BookmarksEntity>> findBookmarksByUser(
 			@RequestHeader("X-User-Id") Long userId,
 			@RequestHeader("X-User-Email") String userEmail,
-			@RequestHeader("X-User-Type") Integer userType) throws Exception {
+			@RequestHeader("X-User-Type") Integer userType) {
 		List<BookmarksEntity> list = repository.findByUserId(userId);
-		if(list.isEmpty())
-			throw new Exception("Usuário não possui bookmarks");
 		return ResponseEntity.ok(list);
 	}
 	
@@ -67,10 +59,12 @@ public class BookmarksController {
 			@RequestBody BookmarkDTO dto,
 			@RequestHeader("X-User-Id") Long userId,
 			@RequestHeader("X-User-Email") String userEmail,
-			@RequestHeader("X-User-Type") Integer userType) {
+			@RequestHeader("X-User-Type") Integer userType) throws Exception {
 		BookmarksEntity bookmark = new BookmarksEntity();
-		UUID uuid = UUID.randomUUID();
-		bookmark.setBookmarkId(uuid);
+		Long id = repository.findMaxBookmarkIdByUserId(userId) + 1;
+		if(id > 99)
+			throw new Exception("User cannot create any more Bookmarks");
+		bookmark.setBookmarkId(id);
 		bookmark.setUserId(userId);
 		BeanUtils.copyProperties(dto, bookmark);
 		repository.save(bookmark);
@@ -80,13 +74,13 @@ public class BookmarksController {
 	@PutMapping("/{bookmarkId}")
 	public ResponseEntity<BookmarksEntity> updateBookmark(
 			@RequestBody BookmarkDTO dto,
-			@PathVariable UUID bookmarkId,
+			@PathVariable Long bookmarkId,
 			@RequestHeader("X-User-Id") Long userId,
 			@RequestHeader("X-User-Email") String userEmail,
-			@RequestHeader("X-User-Type") Integer userType) throws Exception {
+			@RequestHeader("X-User-Type") Integer userType) {
 		var bookmark = repository.findByUserIdAndBookmarkId(userId, bookmarkId);
 		if(bookmark == null)
-			throw new Exception("Bookmark not found");
+			throw new NotFoundException("Bookmark not found");
 		BeanUtils.copyProperties(dto, bookmark);
 		repository.save(bookmark);
 		return ResponseEntity.status(200).body(bookmark);
@@ -94,16 +88,16 @@ public class BookmarksController {
 		
 	@DeleteMapping("/{bookmarkId}")
 	public ResponseEntity<String> deleteBookmark(
-			@PathVariable UUID bookmarkId,
+			@PathVariable Long bookmarkId,
 			@RequestHeader("X-User-Id") Long userId,
 			@RequestHeader("X-User-Email") String userEmail,
-			@RequestHeader("X-User-Type") Integer userType) throws Exception {
+			@RequestHeader("X-User-Type") Integer userType) {
 		repository.deleteByUserIdAndBookmarkId(userId, bookmarkId);
 		return ResponseEntity.status(200).body("Item apagado com sucesso");
 	}
 		
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<String> handlerAuth(Exception e) {
+	@ExceptionHandler(NotFoundException.class)
+	public ResponseEntity<String> handlerAuth(NotFoundException e) {
 		String message = e.getMessage().replaceAll("[\\r\\n]", "");
 		return ResponseEntity.status(404).body(message);
 	}

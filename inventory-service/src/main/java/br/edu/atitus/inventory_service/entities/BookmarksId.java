@@ -7,11 +7,11 @@ public class BookmarksId {
 
 	private Long userId;
 	
-	private UUID bookmarkId;
+	private Long bookmarkId;
 	
 	public BookmarksId() {}
 	
-	public BookmarksId(Long userId, UUID bookmarkId) {
+	public BookmarksId(Long userId, Long bookmarkId) {
 		this.userId = userId;
 		this.bookmarkId = bookmarkId;
 	}

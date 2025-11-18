@@ -17,7 +17,7 @@ public class BookmarksEntity {
 
 	@Id
 	@Column(name = "bookmark_id")
-	private UUID bookmarkId;
+	private Long bookmarkId;
 	
 	@Id
 	@Column(name = "user_id")
@@ -37,11 +37,11 @@ public class BookmarksEntity {
 		this.userId = userId;
 	}
 
-	public UUID getBookmarkId() {
+	public Long getBookmarkId() {
 		return bookmarkId;
 	}
 
-	public void setBookmarkId(UUID bookmarkId) {
+	public void setBookmarkId(Long bookmarkId) {
 		this.bookmarkId = bookmarkId;
 	}
 
