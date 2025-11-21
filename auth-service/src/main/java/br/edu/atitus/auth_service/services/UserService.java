@@ -37,7 +37,6 @@ public class UserService implements UserDetailsService {
 			if (userRepository.existsByEmail(user.getEmail()))
 				throw new Exception("Já existe usuário com este e-mail");
 		}
-		// TODO validar se usuário tem permissão para o tipo escolhido
 	}
 
 	private void format(UserEntity user) throws Exception {
@@ -50,6 +49,14 @@ public class UserService implements UserDetailsService {
 			throw new Exception("Objeto nulo");
 		validate(user);
 		format(user);
+		return userRepository.save(user);
+	}
+	
+	@Transactional
+	public UserEntity update(UserEntity user) throws Exception {
+		if (user == null)
+			throw new Exception("Objeto nulo");
+		validate(user);
 		return userRepository.save(user);
 	}
 

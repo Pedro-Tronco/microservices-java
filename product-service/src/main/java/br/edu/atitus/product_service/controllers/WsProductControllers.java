@@ -42,13 +42,14 @@ public class WsProductControllers {
 	public ResponseEntity<ProductEntity> post(
 			@RequestBody ProductDTO dto,
 			@RequestHeader("X-User-Id") Long userId, 
-			@RequestHeader("X-User-Email") Long userEmail, 
+			@RequestHeader("X-User-Email") String userEmail, 
 			@RequestHeader("X-User-Type") Long userType ) throws Exception {
 		
-		if (userType != 0)
+		if (userType != 0 && userType != 2)
 			throw new AuthenticationException("Usuário sem permissão");
 		
 		var product = convertDto2Entity(dto);
+		product.setUserId(userId);
 		repository.save(product);
 		
 		return ResponseEntity.status(201).body(product);
@@ -62,11 +63,13 @@ public class WsProductControllers {
 			@RequestHeader("X-User-Email") String userEmail, 
 			@RequestHeader("X-User-Type") int userType ) throws Exception {
 		
-		if (userType != 0)
+		if (userType != 0 && repository.findById(idProduct).get().getUserId() != userId)
 			throw new AuthenticationException("Usuário sem permissão");
+		
 		
 		var product = convertDto2Entity(dto);
 		product.setId(idProduct);
+		product.setUserId(userId);
 		repository.save(product);
 		
 		return ResponseEntity.status(200).body(product);
@@ -76,10 +79,10 @@ public class WsProductControllers {
 	public ResponseEntity<String> delete(
 			@PathVariable Long idProduct,
 			@RequestHeader("X-User-Id") Long userId, 
-			@RequestHeader("X-User-Email") Long userEmail, 
+			@RequestHeader("X-User-Email") String userEmail, 
 			@RequestHeader("X-User-Type") Long userType ) throws Exception {
 		
-		if (userType != 0)
+		if (userType != 0 && repository.findById(idProduct).get().getUserId() != userId)
 			throw new AuthenticationException("Usuário sem permissão");
 		
 		repository.deleteById(idProduct);

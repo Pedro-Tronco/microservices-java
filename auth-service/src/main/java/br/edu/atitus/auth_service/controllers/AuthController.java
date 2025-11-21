@@ -2,12 +2,14 @@ package br.edu.atitus.auth_service.controllers;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +20,7 @@ import br.edu.atitus.auth_service.dtos.SigninResponseDTO;
 import br.edu.atitus.auth_service.dtos.SignupDTO;
 import br.edu.atitus.auth_service.entities.UserEntity;
 import br.edu.atitus.auth_service.entities.UserType;
+import br.edu.atitus.auth_service.repositories.UserRepository;
 import br.edu.atitus.auth_service.services.UserService;
 
 @RestController
@@ -26,11 +29,13 @@ public class AuthController {
 
 	private UserService service;
 	private final AuthenticationConfiguration authConfig;
+	private final UserRepository repository;
 
-	public AuthController(UserService service, AuthenticationConfiguration authConfig) {
+	public AuthController(UserService service, AuthenticationConfiguration authConfig, UserRepository repository) {
 		super();
 		this.service = service;
 		this.authConfig = authConfig;
+		this.repository = repository;
 	}
 
 	private UserEntity convertDTO2Entity(SignupDTO dto) {
@@ -55,6 +60,16 @@ public class AuthController {
 		SigninResponseDTO response = new SigninResponseDTO(user, JwtUtil.generateToken(user.getEmail(), user.getId(), user.getType()));
 		return ResponseEntity.ok(response);
 
+	}
+	
+	@PutMapping("/upgrade")
+	public ResponseEntity<UserEntity> upgradeAccount(@RequestBody SigninDTO signin) throws AuthenticationException, Exception {
+		authConfig.getAuthenticationManager()
+		.authenticate(new UsernamePasswordAuthenticationToken(signin.email(), signin.password()));
+		UserEntity user = (UserEntity) service.loadUserByUsername(signin.email());
+		user.setType(UserType.Enterprise);
+		service.update(user);
+		return ResponseEntity.status(HttpStatus.OK).body(user);
 	}
 
 	@ExceptionHandler(Exception.class)

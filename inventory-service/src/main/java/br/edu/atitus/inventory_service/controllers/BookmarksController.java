@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.edu.atitus.inventory_service.clients.InventoryClient;
 import br.edu.atitus.inventory_service.dtos.BookmarkDTO;
 import br.edu.atitus.inventory_service.entities.BookmarksEntity;
 import br.edu.atitus.inventory_service.repositories.BookmarksRepository;
@@ -27,9 +28,11 @@ import jakarta.ws.rs.NotFoundException;
 public class BookmarksController {
 	
 	private final BookmarksRepository repository;
+	private final InventoryClient inventoryClient;
 	
-	public BookmarksController(BookmarksRepository repository) {
+	public BookmarksController(BookmarksRepository repository, InventoryClient inventoryClient ) {
 		this.repository = repository;
+		this.inventoryClient  = inventoryClient;
 	}
 	
 	@GetMapping("/{bookmarksString}")
@@ -91,7 +94,8 @@ public class BookmarksController {
 			@PathVariable Long bookmarkId,
 			@RequestHeader("X-User-Id") Long userId,
 			@RequestHeader("X-User-Email") String userEmail,
-			@RequestHeader("X-User-Type") Integer userType) {
+			@RequestHeader("X-User-Type") Integer userType) throws Exception {
+		inventoryClient.removeAllBookmarkIdFromItems(bookmarkId, userId, userEmail, userType);
 		repository.deleteByUserIdAndBookmarkId(userId, bookmarkId);
 		return ResponseEntity.status(200).body("Item apagado com sucesso");
 	}

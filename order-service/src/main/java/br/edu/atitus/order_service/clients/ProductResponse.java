@@ -1,5 +1,7 @@
 package br.edu.atitus.order_service.clients;
 
+import java.util.List;
+
 public record ProductResponse(
 	    Long id,
 	    String title,
@@ -7,10 +9,11 @@ public record ProductResponse(
 	    String synopsis,
 	    String language,
 		String publisher,
-		String file_extension,
-		String genre_tags,
-		int page_count,
-		String download_url,
+		String fileExtension,
+		String genreTagsString,
+		List<GenreTagResponse> genreTagsList,
+		int pageCount,
+		String downloadUrl,
 	    double price,
 	    String currency,
 	    String imageUrl,

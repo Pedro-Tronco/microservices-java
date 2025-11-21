@@ -2,6 +2,7 @@ CREATE EXTENSION unaccent;
 
 create table tb_product (
 	id serial not null,
+	user_id bigint not null,
 	title varchar(255) not null,
 	author varchar(255) not null,
 	synopsis varchar(1024),

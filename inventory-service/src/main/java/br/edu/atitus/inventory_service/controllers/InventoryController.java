@@ -80,7 +80,8 @@ public class InventoryController {
 			item.setLastAccess(currentTimestamp);
 			repository.save(item);
 			BeanUtils.copyProperties(productClient.getProductById(dto.productId()), item);
-			item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
+			if(item.getBookmarksString() != null)
+				item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
 			item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
 			return item;
 		}).toList();
@@ -192,7 +193,8 @@ public class InventoryController {
 				.stream().map(item -> {
 			BeanUtils.copyProperties(productClient.getProductById(item.getProductId()), item);
 			item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
-			item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
+			if(item.getBookmarksString() != null)
+				item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
 			return item;
 		}).collect(Collectors.toCollection(ArrayList::new));
 		inventoryList.sort(
@@ -301,6 +303,27 @@ public class InventoryController {
 			return item;
 		}).toList();
 		return ResponseEntity.status(200).body(items);
+	}
+	
+	@PutMapping("/bookmarks/remove-all/{bookmarkId}")
+	public ResponseEntity<String> removeAllBookmarkIdFromItems(
+			@PathVariable Long bookmarkId,
+			@RequestHeader("X-User-Id") Long userId, 
+			@RequestHeader("X-User-Email") String userEmail, 
+			@RequestHeader("X-User-Type") int userType ) throws Exception {
+		repository.findByUserId(userId).stream().forEach(item -> {
+			String bookmarkIdFormated = String.format("%02d", bookmarkId);
+			if(item.getBookmarksString().contains(bookmarkIdFormated)) {
+				if (item.getBookmarksString().length() > 2) {
+					bookmarkIdFormated = bookmarkIdFormated+",";
+					item.setBookmarksString((item.getBookmarksString()+",").replace(bookmarkIdFormated, "").substring(0,item.getBookmarksString().length() - 3));
+				} else {
+					item.setBookmarksString("");
+				}
+			}
+			repository.save(item);
+		});
+		return ResponseEntity.status(200).body("All instances of bookmark "+bookmarkId+" deleted");
 	}
 	
 	@ExceptionHandler(NotFoundException.class)

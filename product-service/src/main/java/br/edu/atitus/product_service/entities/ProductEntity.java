@@ -2,6 +2,8 @@ package br.edu.atitus.product_service.entities;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,6 +19,10 @@ public class ProductEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	
+	@JsonIgnore
+	@Column(name = "user_id")
+	private Long userId;
 	
 	private String title;
 	
@@ -184,6 +190,14 @@ public class ProductEntity {
 
 	public void setGenreTagsList(List<GenreTagEntity> genreTagsList) {
 		this.genreTagsList = genreTagsList;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 
 }
