@@ -54,6 +54,14 @@ public class AuthController {
 		return ResponseEntity.ok(currency);
 	}
 	
+	@PutMapping("/prefered-currency/{userId}/{currency}")
+	public ResponseEntity<String> setPreferedCurrency(@PathVariable Long userId, @PathVariable String currency) {
+		var user = repository.findById(userId).get();
+		user.setPreferedCurrency(currency);
+		repository.save(user);
+		return ResponseEntity.ok("Moeda preferida alterada para "+currency);
+	}
+	
 	@PostMapping("/signup")
 	public ResponseEntity<UserEntity> signup(@RequestBody SignupDTO dto) throws Exception {
 		var user = convertDTO2Entity(dto);
@@ -72,12 +80,12 @@ public class AuthController {
 
 	}
 	
-	@PutMapping("/upgrade")
-	public ResponseEntity<UserEntity> upgradeAccount(@RequestBody SigninDTO signin) throws AuthenticationException, Exception {
+	@PutMapping("/upgrade/{userType}")
+	public ResponseEntity<UserEntity> upgradeAccount(@RequestBody SigninDTO signin, @PathVariable UserType userType) throws AuthenticationException, Exception {
 		authConfig.getAuthenticationManager()
 		.authenticate(new UsernamePasswordAuthenticationToken(signin.email(), signin.password()));
 		UserEntity user = (UserEntity) service.loadUserByUsername(signin.email());
-		user.setType(UserType.Enterprise);
+		user.setType(userType);
 		service.update(user);
 		return ResponseEntity.status(HttpStatus.OK).body(user);
 	}
