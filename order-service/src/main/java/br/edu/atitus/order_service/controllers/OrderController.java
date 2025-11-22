@@ -40,8 +40,8 @@ public class OrderController {
 	public ResponseEntity<OrderEntity> createOrder(
 			@RequestBody OrderDTO orderDTO,
 			@RequestHeader("X-User-Id") Long userId,
-			 @RequestHeader("X-User-Email") String userEmail,
-			 @RequestHeader("X-User-Type") Integer userType) {
+			@RequestHeader("X-User-Email") String userEmail,
+			@RequestHeader("X-User-Type") Integer userType) {
 		
 		OrderEntity order = new OrderEntity();
         order.setOrderDate(LocalDateTime.now());

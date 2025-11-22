@@ -38,6 +38,9 @@ public class UserEntity implements UserDetails{
 	@Enumerated(EnumType.ORDINAL)
 	private UserType type;
 
+	@Column(name = "prefered_currency")
+	private String preferedCurrency;
+	
 	public Long getId() {
 		return id;
 	}
@@ -76,6 +79,14 @@ public class UserEntity implements UserDetails{
 
 	public void setType(UserType type) {
 		this.type = type;
+	}
+
+	public String getPreferedCurrency() {
+		return preferedCurrency;
+	}
+
+	public void setPreferedCurrency(String preferedCurrency) {
+		this.preferedCurrency = preferedCurrency;
 	}
 
 	@Override

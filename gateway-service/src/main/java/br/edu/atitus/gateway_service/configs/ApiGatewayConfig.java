@@ -13,9 +13,7 @@ public class ApiGatewayConfig {
 		return builder.routes()
 				.route(p -> p
 						.path("/get")
-						.filters(f -> f
-								.addRequestHeader("X-USER-NAME", "username")
-								.addRequestParameter("name", "fulano"))
+						.filters(f -> f)
 						.uri("http://httpbin.org:80"))
 				.route(p -> p
 						.path("/products/**")
@@ -25,6 +23,9 @@ public class ApiGatewayConfig {
 						.uri("lb://product-service"))
 				.route(p -> p
 						.path("/currency/**")
+						.uri("lb://currency-service"))
+				.route(p -> p
+						.path("/ws/currency/**")
 						.uri("lb://currency-service"))
 				.route(p -> p
 						.path("/greeting/**")
@@ -38,6 +39,9 @@ public class ApiGatewayConfig {
 				.route(p -> p.
 						path("/ws/inventory/**").
 						uri("lb://inventory-service"))
+				.route(p -> p.
+						path("/ws/cart/**").
+						uri("lb://cart-service"))
 				.build();
 	}
 	

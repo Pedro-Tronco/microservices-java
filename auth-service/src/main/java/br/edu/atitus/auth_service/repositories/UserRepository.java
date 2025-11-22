@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import br.edu.atitus.auth_service.dtos.PreferedCurrencyDTO;
 import br.edu.atitus.auth_service.entities.UserEntity;
 
 @Repository
@@ -15,5 +16,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	boolean existsByEmailAndIdNot(String email, Long id);
 
 	Optional<UserEntity> findByEmail(String email);
+	
+	Optional<PreferedCurrencyDTO> findPreferedCurrencyById(Long userId);
 
 }

@@ -8,13 +8,17 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.edu.atitus.auth_service.components.JwtUtil;
+import br.edu.atitus.auth_service.dtos.PreferedCurrencyDTO;
 import br.edu.atitus.auth_service.dtos.SigninDTO;
 import br.edu.atitus.auth_service.dtos.SigninResponseDTO;
 import br.edu.atitus.auth_service.dtos.SignupDTO;
@@ -44,6 +48,12 @@ public class AuthController {
 		return user;
 	}
 
+	@GetMapping("/prefered-currency/{userId}")
+	public ResponseEntity<PreferedCurrencyDTO> getPreferedCurrency(@PathVariable Long userId) {
+		PreferedCurrencyDTO currency = repository.findPreferedCurrencyById(userId).get();
+		return ResponseEntity.ok(currency);
+	}
+	
 	@PostMapping("/signup")
 	public ResponseEntity<UserEntity> signup(@RequestBody SignupDTO dto) throws Exception {
 		var user = convertDTO2Entity(dto);

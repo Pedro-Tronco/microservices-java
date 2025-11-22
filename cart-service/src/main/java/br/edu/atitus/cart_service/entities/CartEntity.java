@@ -1,11 +1,11 @@
-package br.edu.atitus.inventory_service.entities;
+package br.edu.atitus.cart_service.entities;
 
 import java.sql.Timestamp;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import br.edu.atitus.inventory_service.clients.GenreTagResponse;
+import br.edu.atitus.cart_service.clients.GenreTagResponse;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -14,9 +14,9 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
 @Entity
-@IdClass(InventoryId.class)
-@Table(name = "tb_inventory")
-public class InventoryEntity {
+@IdClass(CartId.class)
+@Table(name = "tb_cart")
+public class CartEntity {
 
     @Id
     @Column(name = "user_id", nullable = false)
@@ -26,18 +26,12 @@ public class InventoryEntity {
     @Id
     @Column(name = "product_id", nullable = false)
     private Long productId;
-
-    @Column(name = "is_favorite")
-    private boolean isFavorite;
-
-    @Column(name = "bookmarks")
-    private String bookmarksString;
     
-    @Column(name = "last_access")
-    private Timestamp lastAccess;
+    @Column(name = "is_selected")
+    private boolean isSelected;
     
-    @Transient
-    private List<BookmarksEntity> bookmarksList;
+    @Column
+    private Timestamp inclusion;
     
     @Transient
     private String title;
@@ -75,20 +69,14 @@ public class InventoryEntity {
     @Transient
     private String enviroment;
     
-    public InventoryEntity() {}
+    @Transient
+    private double convertedPrice;
     
-    public InventoryEntity(Long userId, Long productId, boolean isFavorite, String bookmarks) {
-        this.userId = userId;
-        this.productId = productId;
-    }
-
-	public List<GenreTagResponse> getGenreTagsList() {
-		return genreTagsList;
-	}
-
-	public void setGenreTagsList(List<GenreTagResponse> genreTagsList) {
-		this.genreTagsList = genreTagsList;
-	}
+    @Transient
+    private double price;
+    
+    @Transient
+    private String currency;
 
 	public Long getUserId() {
 		return userId;
@@ -106,12 +94,20 @@ public class InventoryEntity {
 		this.productId = productId;
 	}
 
-	public boolean isFavorite() {
-		return isFavorite;
+	public boolean isSelected() {
+		return isSelected;
 	}
 
-	public void setFavorite(boolean isFavorite) {
-		this.isFavorite = isFavorite;
+	public void setSelected(boolean isSelected) {
+		this.isSelected = isSelected;
+	}
+
+	public Timestamp getInclusion() {
+		return inclusion;
+	}
+
+	public void setInclusion(Timestamp inclusion) {
+		this.inclusion = inclusion;
 	}
 
 	public String getTitle() {
@@ -186,22 +182,6 @@ public class InventoryEntity {
 		this.imageUrl = imageUrl;
 	}
 
-	public String getEnviroment() {
-		return enviroment;
-	}
-
-	public void setEnviroment(String enviroment) {
-		this.enviroment = enviroment;
-	}
-
-	public Timestamp getLastAccess() {
-		return lastAccess;
-	}
-
-	public void setLastAccess(Timestamp lastAccess) {
-		this.lastAccess = lastAccess;
-	}
-	
 	public String getGenreTagsString() {
 		return genreTagsString;
 	}
@@ -210,20 +190,45 @@ public class InventoryEntity {
 		this.genreTagsString = genreTagsString;
 	}
 
-	public String getBookmarksString() {
-		return bookmarksString;
+	public List<GenreTagResponse> getGenreTagsList() {
+		return genreTagsList;
 	}
 
-	public void setBookmarksString(String bookmarksString) {
-		this.bookmarksString = bookmarksString;
+	public void setGenreTagsList(List<GenreTagResponse> genreTagsList) {
+		this.genreTagsList = genreTagsList;
 	}
 
-	public List<BookmarksEntity> getBookmarksList() {
-		return bookmarksList;
+	public String getEnviroment() {
+		return enviroment;
 	}
 
-	public void setBookmarksList(List<BookmarksEntity> bookmarksList) {
-		this.bookmarksList = bookmarksList;
+	public void setEnviroment(String enviroment) {
+		this.enviroment = enviroment;
 	}
+
+	public double getConvertedPrice() {
+		return convertedPrice;
+	}
+
+	public void setConvertedPrice(double convertedPrice) {
+		this.convertedPrice = convertedPrice;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
+	}
+    
     
 }

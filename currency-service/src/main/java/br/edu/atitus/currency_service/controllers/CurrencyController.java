@@ -12,9 +12,12 @@ import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.edu.atitus.currency_service.clients.AuthClient;
+import br.edu.atitus.currency_service.clients.AuthResponse;
 import br.edu.atitus.currency_service.clients.CurrencyBCClient;
 import br.edu.atitus.currency_service.clients.CurrencyBCResponse;
 import br.edu.atitus.currency_service.clients.NationalHolidayClient;
@@ -76,15 +79,14 @@ public class CurrencyController {
 		} else {
 			try {
 				Calendar cal = Calendar.getInstance();
-			    cal.setTime(new Date());
 			    
 			    int dayOfWeek = 0;
 			    while (dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY || isHoliday(cal)) {
 			        cal.add(Calendar.DAY_OF_MONTH, -1);
 			        dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
 			    }
-
-			    String date = (cal.get(Calendar.MONTH) + 1) + "-" + cal.get(Calendar.DAY_OF_MONTH) + "-" + cal.get(Calendar.YEAR);
+			    String date = (cal.get(Calendar.MONTH)) + "-" + cal.get(Calendar.DAY_OF_MONTH) + "-" + cal.get(Calendar.YEAR);
+			    System.out.println(date);
 				double sourceRate = 1;
 				double targetRate = 1;
 				
@@ -149,6 +151,6 @@ public class CurrencyController {
 	    }
 	    
 	    return false;
-	};
+	}
 	
 }

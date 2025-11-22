@@ -2,6 +2,8 @@ package br.edu.atitus.inventory_service.entities;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +23,7 @@ public class BookmarksEntity {
 	
 	@Id
 	@Column(name = "user_id")
+	@JsonIgnore
 	private Long userId;
 	
 	@Column(length = 50)
