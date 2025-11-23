@@ -119,7 +119,7 @@ public class CartController {
 			@PathVariable String currency,
 			@RequestHeader("X-User-Id") Long userId
 			) throws Exception {
-		var item = repository.findByUserIdAndProductId(userId, productId);
+		var item = repository.findByUserIdAndProductId(userId, productId).get();
 		if (item == null)
 			throw new NotFoundException("Product not found in cart");
 		

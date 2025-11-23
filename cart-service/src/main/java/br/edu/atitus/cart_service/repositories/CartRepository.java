@@ -19,7 +19,7 @@ public interface CartRepository extends JpaRepository<CartEntity, CartId>{
 
 	List<CartItemDTO> findByUserIdAndIsSelectedTrue(Long userId);
 	
-	CartEntity findByUserIdAndProductId(Long userId, Long productId);
+	Optional<CartEntity> findByUserIdAndProductId(Long userId, Long productId);
 	
 	@Transactional
 	void deleteByUserIdAndProductId(Long userId, Long productId);

@@ -1,7 +1,6 @@
 package br.edu.atitus.inventory_service.entities;
 
 import java.util.Objects;
-import java.util.UUID;
 
 public class BookmarksId {
 

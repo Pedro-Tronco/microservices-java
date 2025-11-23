@@ -3,13 +3,9 @@ package br.edu.atitus.inventory_service.controllers;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
-
-import javax.security.sasl.AuthenticationException;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.beans.BeanUtils;
@@ -21,7 +17,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.data.web.SortDefault.SortDefaults;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -36,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.edu.atitus.inventory_service.clients.ProductClient;
-import br.edu.atitus.inventory_service.clients.ProductResponse;
 import br.edu.atitus.inventory_service.dtos.InventoryListDTO;
 import br.edu.atitus.inventory_service.entities.InventoryEntity;
 import br.edu.atitus.inventory_service.repositories.InventoryRepository;
