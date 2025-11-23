@@ -1,5 +1,7 @@
 package br.edu.atitus.product_service.controllers;
 
+import java.util.NoSuchElementException;
+
 import javax.security.sasl.AuthenticationException;
 
 import org.springframework.beans.BeanUtils;
@@ -17,19 +19,17 @@ import org.springframework.web.bind.annotation.RestController;
 import br.edu.atitus.product_service.dtos.ProductDTO;
 import br.edu.atitus.product_service.entities.ProductEntity;
 import br.edu.atitus.product_service.repositories.ProductRepository;
+import jakarta.ws.rs.NotFoundException;
 
 @RestController
 @RequestMapping("/ws/products")
 public class WsProductControllers {
 
 	private final ProductRepository repository;
-	
-	private final GenreTagController genreController;
 
-	public WsProductControllers(ProductRepository repository, GenreTagController genreController) {
+	public WsProductControllers(ProductRepository repository) {
 		super();
 		this.repository = repository;
-		this.genreController = genreController;
 	}
 	
 	private ProductEntity convertDto2Entity(ProductDTO dto) {
@@ -90,10 +90,29 @@ public class WsProductControllers {
 		return ResponseEntity.ok("Produto " + idProduct + " excluído com sucesso");
 	}
 	
+	
+	@ExceptionHandler(NotFoundException.class)
+	public ResponseEntity<String> handler(NotFoundException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(404).body(message);
+	}
+	
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<String> handlerAuth(IllegalArgumentException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(400).body(message);
+	}
+	
 	@ExceptionHandler(AuthenticationException.class)
 	public ResponseEntity<String> handlerAuth(AuthenticationException e) {
 		String message = e.getMessage().replaceAll("[\\r\\n]", "");
 		return ResponseEntity.status(403).body(message);
+	}
+	
+	@ExceptionHandler(NoSuchElementException.class)
+	public ResponseEntity<String> handlerAuth(NoSuchElementException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(404).body(message);
 	}
 	
 }

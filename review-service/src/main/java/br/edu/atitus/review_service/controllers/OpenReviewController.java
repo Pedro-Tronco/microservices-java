@@ -1,6 +1,9 @@
 package br.edu.atitus.review_service.controllers;
 
 import java.sql.Timestamp;
+import java.util.NoSuchElementException;
+
+import javax.security.sasl.AuthenticationException;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +13,8 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,10 +29,11 @@ import br.edu.atitus.review_service.dtos.ReviewDTO;
 import br.edu.atitus.review_service.dtos.ReviewResponseDTO;
 import br.edu.atitus.review_service.entities.ReviewEntity;
 import br.edu.atitus.review_service.repositories.ReviewRepository;
+import jakarta.ws.rs.NotFoundException;
 
 @RestController
 @RequestMapping("/reviews")
-public class ReviewController {
+public class OpenReviewController {
 
 	@Value("${server.port}")
 	private int serverPort;
@@ -35,7 +41,7 @@ public class ReviewController {
 	private final ReviewRepository repository;
 	private final AuthClient authClient;
 	
-	public ReviewController(
+	public OpenReviewController(
 			ReviewRepository repository,
 			AuthClient authClient
 			) {
@@ -50,47 +56,44 @@ public class ReviewController {
 			Pageable pageable) {
 		double totalGrade = 0;
 		int totalReviews = 0;
-		Page<ReviewEntity> reviews = repository.findByProductid(productId, pageable);
+		Page<ReviewEntity> reviews = repository.findByProductId(productId, pageable);
 		for(ReviewEntity review : reviews) {
-			review.setUsername(authClient.getUsernameByUserId(productId).username());
+			review.setUsername(authClient.getUsernameByUserId(review.getUserId()).name());
 			totalGrade += review.getGrade();
 			totalReviews ++;
 		}
 		ReviewResponseDTO response = new ReviewResponseDTO();
 		response.setReviews(reviews);
-		response.setAvgGrade(totalGrade / totalReviews);
+		if(totalReviews > 0)
+			response.setAvgGrade(totalGrade / totalReviews);
+		else
+			response.setAvgGrade(0);
 		response.setTotalReviews(totalReviews);
 		return ResponseEntity.ok(response);
 	}
 	
-	@GetMapping("/by-user/{productId}")
-	public ResponseEntity<ReviewEntity> getReviewByUserIdAndProductId(
-			@PathVariable Long productId,
-			@RequestHeader("X-User-Id") Long userId
-			) {
-		var review = repository.findByProductIdAndUserId(productId, userId).get();
-		review.setUsername(authClient.getUsernameByUserId(productId).username());
-		return ResponseEntity.ok(review);
+	@ExceptionHandler(NotFoundException.class)
+	public ResponseEntity<String> handler(NotFoundException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(404).body(message);
 	}
 	
-	@PostMapping("/{productId}")
-	public ResponseEntity<ReviewEntity> postReview(
-			@PathVariable Long productId,
-			@RequestHeader("X-User-Id") Long userId,
-			@RequestBody ReviewDTO dto
-			) {
-		ReviewEntity review = new ReviewEntity();
-		review.setProductId(productId);
-		review.setUserId(userId);
-		BeanUtils.copyProperties(dto, review);
-		Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
-		review.setPostDate(currentTimestamp);
-		repository.save(review);
-		review.setUsername(authClient.getUsernameByUserId(productId).username());
-		return ResponseEntity.status(HttpStatus.CREATED).body(review);
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<String> handlerAuth(IllegalArgumentException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(400).body(message);
 	}
 	
-	@PutMapping("/{productId}")
-	public ResponseEntity<ReviewEntity> updateReview
+	@ExceptionHandler(AuthenticationException.class)
+	public ResponseEntity<String> handlerAuth(AuthenticationException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(403).body(message);
+	}
+	
+	@ExceptionHandler(NoSuchElementException.class)
+	public ResponseEntity<String> handlerAuth(NoSuchElementException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(404).body(message);
+	}
 	
 }

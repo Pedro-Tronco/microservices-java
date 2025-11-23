@@ -50,6 +50,9 @@ public class ApiGatewayConfig {
 				.route(p -> p
 						.path("/reviews/**")
 						.uri("lb://review-service"))
+				.route(p -> p
+						.path("/ws/reviews/**")
+						.uri("lb://review-service"))
 				.build();
 	}
 	

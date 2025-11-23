@@ -2,6 +2,9 @@ package br.edu.atitus.order_service.controllers;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
+
+import javax.security.sasl.AuthenticationException;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +12,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +27,7 @@ import br.edu.atitus.order_service.dtos.OrderDTO;
 import br.edu.atitus.order_service.entities.OrderEntity;
 import br.edu.atitus.order_service.entities.OrderItemEntity;
 import br.edu.atitus.order_service.services.OrderService;
+import jakarta.ws.rs.NotFoundException;
 
 @RestController
 @RequestMapping("/ws/orders")
@@ -81,5 +86,30 @@ public class OrderController {
 		targetCurrency = targetCurrency.toUpperCase();
 		Page<OrderEntity> orders = orderService.findOrdersByCustomerId(userId, targetCurrency, pageable);
 		return ResponseEntity.ok(orders);
+	}
+	
+	
+	@ExceptionHandler(NotFoundException.class)
+	public ResponseEntity<String> handler(NotFoundException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(404).body(message);
+	}
+	
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<String> handlerAuth(IllegalArgumentException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(400).body(message);
+	}
+	
+	@ExceptionHandler(AuthenticationException.class)
+	public ResponseEntity<String> handlerAuth(AuthenticationException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(403).body(message);
+	}
+	
+	@ExceptionHandler(NoSuchElementException.class)
+	public ResponseEntity<String> handlerAuth(NoSuchElementException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(404).body(message);
 	}
 }

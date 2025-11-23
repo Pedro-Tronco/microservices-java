@@ -3,6 +3,9 @@ package br.edu.atitus.inventory_service.controllers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
+
+import javax.security.sasl.AuthenticationException;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.ResponseEntity;
@@ -100,8 +103,27 @@ public class BookmarksController {
 		return ResponseEntity.status(200).body("Item apagado com sucesso");
 	}
 		
+	
 	@ExceptionHandler(NotFoundException.class)
-	public ResponseEntity<String> handlerAuth(NotFoundException e) {
+	public ResponseEntity<String> handler(NotFoundException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(404).body(message);
+	}
+	
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<String> handlerAuth(IllegalArgumentException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(400).body(message);
+	}
+	
+	@ExceptionHandler(AuthenticationException.class)
+	public ResponseEntity<String> handlerAuth(AuthenticationException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(403).body(message);
+	}
+	
+	@ExceptionHandler(NoSuchElementException.class)
+	public ResponseEntity<String> handlerAuth(NoSuchElementException e) {
 		String message = e.getMessage().replaceAll("[\\r\\n]", "");
 		return ResponseEntity.status(404).body(message);
 	}

@@ -23,6 +23,7 @@ public class ReviewEntity {
 
     @Id
     @Column(name = "product_id", nullable = false)
+    @JsonIgnore
     private Long productId;
     
     @Column

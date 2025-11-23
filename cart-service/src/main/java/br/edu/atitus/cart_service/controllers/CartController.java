@@ -4,7 +4,10 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+
+import javax.security.sasl.AuthenticationException;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +19,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -136,6 +140,30 @@ public class CartController {
 		item.setEnviroment("Cart-service running on port: "+serverPort+" - " + item.getEnviroment());
 		
 		return ResponseEntity.ok(item);
+	}
+	
+	@ExceptionHandler(NotFoundException.class)
+	public ResponseEntity<String> handler(NotFoundException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(404).body(message);
+	}
+	
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<String> handlerAuth(IllegalArgumentException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(400).body(message);
+	}
+	
+	@ExceptionHandler(AuthenticationException.class)
+	public ResponseEntity<String> handlerAuth(AuthenticationException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(403).body(message);
+	}
+	
+	@ExceptionHandler(NoSuchElementException.class)
+	public ResponseEntity<String> handlerAuth(NoSuchElementException e) {
+		String message = e.getMessage().replaceAll("[\\r\\n]", "");
+		return ResponseEntity.status(404).body(message);
 	}
 	
 }
