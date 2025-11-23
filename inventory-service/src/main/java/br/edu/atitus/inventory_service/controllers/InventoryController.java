@@ -3,6 +3,7 @@ package br.edu.atitus.inventory_service.controllers;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -214,7 +215,8 @@ public class InventoryController {
 		item.setLastAccess(currentTimestamp);
 		repository.save(item);
 		BeanUtils.copyProperties(productClient.getProductById(item.getProductId()), item);
-		item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
+		if(item.getBookmarksString() != null)
+			item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
 		return ResponseEntity.ok(item);
 	}
 	
@@ -238,7 +240,8 @@ public class InventoryController {
 		repository.save(item);
 		BeanUtils.copyProperties(productClient.getProductById(item.getProductId()), item);
 		item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
-		item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
+		if(item.getBookmarksString() != null)
+			item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
 		return ResponseEntity.ok(item);
 		
 	}
@@ -263,8 +266,8 @@ public class InventoryController {
 			}
 			BeanUtils.copyProperties(productClient.getProductById(dto.productId()), item);
 			item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
-			item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
-			repository.save(item);
+			if(item.getBookmarksString() != null)
+				item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
 			return item;
 		}).toList();
 		return ResponseEntity.status(200).body(items);
@@ -292,8 +295,8 @@ public class InventoryController {
 			}
 			BeanUtils.copyProperties(productClient.getProductById(dto.productId()), item);
 			item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
-			item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
-			repository.save(item);
+			if(item.getBookmarksString() != null)
+				item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
 			return item;
 		}).toList();
 		return ResponseEntity.status(200).body(items);

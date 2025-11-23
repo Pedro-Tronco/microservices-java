@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import br.edu.atitus.auth_service.dtos.PreferedCurrencyDTO;
+import br.edu.atitus.auth_service.dtos.UsernameDTO;
 import br.edu.atitus.auth_service.entities.UserEntity;
 
 @Repository
@@ -19,4 +20,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	
 	Optional<PreferedCurrencyDTO> findPreferedCurrencyById(Long userId);
 
+	Optional<UsernameDTO> findNameById(Long userId);
 }

@@ -20,6 +20,7 @@ import br.edu.atitus.auth_service.dtos.PreferedCurrencyDTO;
 import br.edu.atitus.auth_service.dtos.SigninDTO;
 import br.edu.atitus.auth_service.dtos.SigninResponseDTO;
 import br.edu.atitus.auth_service.dtos.SignupDTO;
+import br.edu.atitus.auth_service.dtos.UsernameDTO;
 import br.edu.atitus.auth_service.entities.UserEntity;
 import br.edu.atitus.auth_service.entities.UserType;
 import br.edu.atitus.auth_service.repositories.UserRepository;
@@ -50,6 +51,12 @@ public class AuthController {
 	public ResponseEntity<PreferedCurrencyDTO> getPreferedCurrency(@PathVariable Long userId) {
 		PreferedCurrencyDTO currency = repository.findPreferedCurrencyById(userId).get();
 		return ResponseEntity.ok(currency);
+	}
+	
+	@GetMapping("/username/{userId}")
+	public ResponseEntity<UsernameDTO> getUsername(@PathVariable Long userId) {
+		UsernameDTO username = repository.findNameById(userId).get();
+		return ResponseEntity.ok(username);
 	}
 	
 	@PutMapping("/prefered-currency/{userId}/{currency}")
