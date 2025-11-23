@@ -78,7 +78,7 @@ public class InventoryController {
 			item.setLastAccess(currentTimestamp);
 			repository.save(item);
 			BeanUtils.copyProperties(productClient.getProductById(dto.productId()), item);
-			if(item.getBookmarksString() != null)
+			if(item.getBookmarksString() != null && !item.getBookmarksString().isEmpty())
 				item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
 			item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
 			return item;
@@ -191,7 +191,7 @@ public class InventoryController {
 				.stream().map(item -> {
 			BeanUtils.copyProperties(productClient.getProductById(item.getProductId()), item);
 			item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
-			if(item.getBookmarksString() != null)
+			if(item.getBookmarksString() != null && !item.getBookmarksString().isEmpty())
 				item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
 			return item;
 		}).collect(Collectors.toCollection(ArrayList::new));
@@ -218,7 +218,7 @@ public class InventoryController {
 		item.setLastAccess(currentTimestamp);
 		repository.save(item);
 		BeanUtils.copyProperties(productClient.getProductById(item.getProductId()), item);
-		if(item.getBookmarksString() != null)
+		if(item.getBookmarksString() != null && !item.getBookmarksString().isEmpty())
 			item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
 		return ResponseEntity.ok(item);
 	}
@@ -243,7 +243,7 @@ public class InventoryController {
 		repository.save(item);
 		BeanUtils.copyProperties(productClient.getProductById(item.getProductId()), item);
 		item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
-		if(item.getBookmarksString() != null)
+		if(item.getBookmarksString() != null && !item.getBookmarksString().isEmpty())
 			item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
 		return ResponseEntity.ok(item);
 		
@@ -269,7 +269,7 @@ public class InventoryController {
 			}
 			BeanUtils.copyProperties(productClient.getProductById(dto.productId()), item);
 			item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
-			if(item.getBookmarksString() != null)
+			if(item.getBookmarksString() != null && !item.getBookmarksString().isEmpty())
 				item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
 			return item;
 		}).toList();
@@ -298,7 +298,7 @@ public class InventoryController {
 			}
 			BeanUtils.copyProperties(productClient.getProductById(dto.productId()), item);
 			item.setEnviroment("Inventory-service running on port: "+serverPort+" - " + item.getEnviroment());
-			if(item.getBookmarksString() != null)
+			if(item.getBookmarksString() != null && !item.getBookmarksString().isEmpty())
 				item.setBookmarksList(bookmarksController.findBookmarksByBookmarkString(item.getBookmarksString(), userId));
 			return item;
 		}).toList();
