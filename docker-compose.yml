@@ -3,6 +3,8 @@ volumes:
   db-currency-data:
   db-user-data:
   db-order-data:
+  db-cart-data:
+  db-inventory-data:
 
 services:
 
@@ -128,6 +130,54 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka
     
+   # -------------------------------
+  db-inventory:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: db_inventory
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - db-inventory-data:/var/lib/postgresql/data
+    
+  inventory-service:
+    image: inventory-service:latest
+    build:
+      context: ./inventory-service
+    depends_on:
+      - discovery-service
+      - db-inventory
+      - product-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-inventory:5432/db_inventory
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka  
+     # -------------------------------
+  db-cart:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: db_cart
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - db-cart-data:/var/lib/postgresql/data
+    
+  cart-service:
+    image: cart-service:latest
+    build:
+      context: ./cart-service
+    depends_on:
+      - discovery-service
+      - db-cart
+      - currency-service
+      - product-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-cart:5432/db_cart
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka  
+
   # -------------------------------
   gateway-service:
     image: gateway-service:latest

@@ -12,7 +12,5 @@ public interface InventoryClient {
 	@PutMapping("/ws/inventory/bookmarks/remove-all/{bookmarkId}")
 	public ResponseEntity<String> removeAllBookmarkIdFromItems(
 			@PathVariable Long bookmarkId,
-			@RequestHeader("X-User-Id") Long userId, 
-			@RequestHeader("X-User-Email") String userEmail, 
-			@RequestHeader("X-User-Type") int userType);
+			@RequestHeader("X-User-Id") Long userId);
 }

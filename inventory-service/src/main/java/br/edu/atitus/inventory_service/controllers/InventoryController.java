@@ -288,7 +288,7 @@ public class InventoryController {
 			if (item == null)
 				throw new NotFoundException("Item not found in Inventory");
 			String bookmarkIdFormated = String.format("%02d", bookmarkId);
-			if(item.getBookmarksString().contains(bookmarkIdFormated)) {
+			if(item.getBookmarksString() != null && item.getBookmarksString().contains(bookmarkIdFormated)) {
 				if (item.getBookmarksString().length() > 2) {
 					bookmarkIdFormated = bookmarkIdFormated+",";
 					item.setBookmarksString((item.getBookmarksString()+",").replace(bookmarkIdFormated, "").substring(0,item.getBookmarksString().length() - 3));
@@ -308,12 +308,10 @@ public class InventoryController {
 	@PutMapping("/bookmarks/remove-all/{bookmarkId}")
 	public ResponseEntity<String> removeAllBookmarkIdFromItems(
 			@PathVariable Long bookmarkId,
-			@RequestHeader("X-User-Id") Long userId, 
-			@RequestHeader("X-User-Email") String userEmail, 
-			@RequestHeader("X-User-Type") int userType ) throws Exception {
+			@RequestHeader("X-User-Id") Long userId) throws Exception {
 		repository.findByUserId(userId).stream().forEach(item -> {
 			String bookmarkIdFormated = String.format("%02d", bookmarkId);
-			if(item.getBookmarksString().contains(bookmarkIdFormated)) {
+			if(item.getBookmarksString() != null && item.getBookmarksString().contains(bookmarkIdFormated)) {
 				if (item.getBookmarksString().length() > 2) {
 					bookmarkIdFormated = bookmarkIdFormated+",";
 					item.setBookmarksString((item.getBookmarksString()+",").replace(bookmarkIdFormated, "").substring(0,item.getBookmarksString().length() - 3));

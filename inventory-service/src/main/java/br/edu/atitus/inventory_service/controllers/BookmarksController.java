@@ -95,7 +95,7 @@ public class BookmarksController {
 			@RequestHeader("X-User-Id") Long userId,
 			@RequestHeader("X-User-Email") String userEmail,
 			@RequestHeader("X-User-Type") Integer userType) throws Exception {
-		inventoryClient.removeAllBookmarkIdFromItems(bookmarkId, userId, userEmail, userType);
+		inventoryClient.removeAllBookmarkIdFromItems(bookmarkId, userId);
 		repository.deleteByUserIdAndBookmarkId(userId, bookmarkId);
 		return ResponseEntity.status(200).body("Item apagado com sucesso");
 	}
