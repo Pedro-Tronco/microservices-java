@@ -210,7 +210,7 @@ public class InventoryController {
 			@RequestHeader("X-User-Id") Long userId, 
 			@RequestHeader("X-User-Email") String userEmail, 
 			@RequestHeader("X-User-Type") int userType) throws Exception {
-		var item = repository.findByUserIdAndProductId(userId, productId);
+		var item = repository.findByUserIdAndProductId(userId, productId).get();
 		if(item == null)
 			throw new NotFoundException("Product not found for user");
 		
@@ -230,7 +230,7 @@ public class InventoryController {
 			@RequestHeader("X-User-Email") String userEmail, 
 			@RequestHeader("X-User-Type") int userType ) throws Exception  {
 		
-		var item = repository.findByUserIdAndProductId(userId, productId);
+		var item = repository.findByUserIdAndProductId(userId, productId).get();
 		
 		if(item == null)
 			throw new NotFoundException("Product not found for user");
@@ -257,7 +257,7 @@ public class InventoryController {
 			@RequestHeader("X-User-Email") String userEmail, 
 			@RequestHeader("X-User-Type") int userType ) throws Exception {
 		List<InventoryEntity> items = inventoryDTO.items().stream().map(dto -> {
-			var item = repository.findByUserIdAndProductId(userId, dto.productId());
+			var item = repository.findByUserIdAndProductId(userId, dto.productId()).get();
 			if (item.getProductId() == null)
 				throw new NotFoundException("Item not found in Inventory");
 			String bookmarkIdFormated = String.format("%02d", bookmarkId);
@@ -284,7 +284,7 @@ public class InventoryController {
 			@RequestHeader("X-User-Email") String userEmail, 
 			@RequestHeader("X-User-Type") int userType ) throws Exception {
 		List<InventoryEntity> items = inventoryDTO.items().stream().map(dto -> {
-			var item = repository.findByUserIdAndProductId(userId, dto.productId());
+			var item = repository.findByUserIdAndProductId(userId, dto.productId()).get();
 			if (item == null)
 				throw new NotFoundException("Item not found in Inventory");
 			String bookmarkIdFormated = String.format("%02d", bookmarkId);

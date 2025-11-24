@@ -67,7 +67,7 @@ public class BookmarksController {
 			@RequestHeader("X-User-Email") String userEmail,
 			@RequestHeader("X-User-Type") Integer userType) throws Exception {
 		BookmarksEntity bookmark = new BookmarksEntity();
-		Long id = repository.findMaxBookmarkIdByUserId(userId) + 1;
+		Long id = repository.findMaxBookmarkIdByUserId(userId).get() + 1;
 		if(id > 99)
 			throw new Exception("User cannot create any more Bookmarks");
 		bookmark.setBookmarkId(id);
@@ -84,7 +84,7 @@ public class BookmarksController {
 			@RequestHeader("X-User-Id") Long userId,
 			@RequestHeader("X-User-Email") String userEmail,
 			@RequestHeader("X-User-Type") Integer userType) {
-		var bookmark = repository.findByUserIdAndBookmarkId(userId, bookmarkId);
+		var bookmark = repository.findByUserIdAndBookmarkId(userId, bookmarkId).get();
 		if(bookmark == null)
 			throw new NotFoundException("Bookmark not found");
 		BeanUtils.copyProperties(dto, bookmark);

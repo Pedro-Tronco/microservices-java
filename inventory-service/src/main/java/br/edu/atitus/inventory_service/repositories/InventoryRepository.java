@@ -1,6 +1,7 @@
 package br.edu.atitus.inventory_service.repositories;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +15,7 @@ import jakarta.transaction.Transactional;
 @Repository
 public interface InventoryRepository extends JpaRepository<InventoryEntity, InventoryId> {
 	
-	InventoryEntity findByUserIdAndProductId(Long userId, Long productId);
+	Optional<InventoryEntity> findByUserIdAndProductId(Long userId, Long productId);
 	
 	List<InventoryEntity>findByUserId(Long userId);
 	

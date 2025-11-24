@@ -1,6 +1,7 @@
 package br.edu.atitus.inventory_service.repositories;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,12 +14,12 @@ public interface BookmarksRepository extends JpaRepository<BookmarksEntity, Book
 
 	List<BookmarksEntity> findByUserId(Long userId);
 	
-	BookmarksEntity findByUserIdAndBookmarkId(Long userId, Long bookmarkId);
+	Optional<BookmarksEntity> findByUserIdAndBookmarkId(Long userId, Long bookmarkId);
 	
 	List<BookmarksEntity> findAllByUserIdAndBookmarkIdIn(Long userId, List<Long> bookmarkId);
 	
 	@Query(value = "SELECT COALESCE(MAX(bookmarkId), 0) FROM BookmarksEntity WHERE userId = :userId")
-	Long findMaxBookmarkIdByUserId(Long userId);
+	Optional<Long> findMaxBookmarkIdByUserId(Long userId);
 	
 	@Transactional
 	void deleteByUserIdAndBookmarkId(Long userId, Long bookmarkId);

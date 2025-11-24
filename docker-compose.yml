@@ -153,7 +153,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka  
-     # -------------------------------
+ # -------------------------------
   db-cart:
     image: postgres:16
     environment:
@@ -174,6 +174,29 @@ services:
       - product-service
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-cart:5432/db_cart
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka  
+
+ # -------------------------------
+  db-review:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: db_review
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - db-review-data:/var/lib/postgresql/data
+    
+  review-service:
+    image: review-service:latest
+    build:
+      context: ./review-service
+    depends_on:
+      - discovery-service
+      - db-review
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-review:5432/db_review
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka  
