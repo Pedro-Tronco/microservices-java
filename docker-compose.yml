@@ -194,6 +194,7 @@ services:
       context: ./review-service
     depends_on:
       - discovery-service
+      - auth-service
       - db-review
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db-review:5432/db_review

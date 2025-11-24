@@ -13,6 +13,8 @@ import jakarta.transaction.Transactional;
 public interface ReviewRepository extends JpaRepository<ReviewEntity, ReviewId>{
 	Page<ReviewEntity> findByProductId(Long productId, Pageable pageable);
 	
+	Page<ReviewEntity> findAll(Pageable pageable);
+	
 	Optional<ReviewEntity> findByProductIdAndUserId(Long productId, Long userId);
 	
 	@Transactional

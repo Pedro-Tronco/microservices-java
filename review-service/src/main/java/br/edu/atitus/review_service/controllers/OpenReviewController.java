@@ -72,6 +72,17 @@ public class OpenReviewController {
 		return ResponseEntity.ok(response);
 	}
 	
+	@GetMapping("/all")
+	public ResponseEntity<Page<ReviewEntity>> getAllReviews(
+			@PageableDefault(page = 0, size = 30, sort = "postDate", direction = Direction.DESC) 
+			Pageable pageable) {
+		Page<ReviewEntity> reviews = repository.findAll(pageable);
+		for(ReviewEntity review : reviews) {
+			review.setUsername(authClient.getUsernameByUserId(review.getUserId()).name());
+		}
+		return ResponseEntity.ok(reviews);
+	}
+	
 	@ExceptionHandler(NotFoundException.class)
 	public ResponseEntity<String> handler(NotFoundException e) {
 		String message = e.getMessage().replaceAll("[\\r\\n]", "");
